@@ -16,7 +16,7 @@ export type DashboardSearchParams = {
 export async function listPermits(searchParams: DashboardSearchParams) {
   const supabase = createClient();
   let query = supabase.from("permits").select("*");
-  const normalizedSearch = searchParams.search?.trim();
+  const normalizedSearch = normalizeSearchTerm(searchParams.search);
   const normalizedPriorityLabel = normalizePriorityLabel(searchParams.priorityLabel);
 
   if (searchParams.leadStatus) {
@@ -129,6 +129,19 @@ function normalizePriorityLabel(value?: string) {
   }
 
   return undefined;
+}
+
+function normalizeSearchTerm(value?: string) {
+  if (!value) {
+    return undefined;
+  }
+
+  const normalized = value
+    .trim()
+    .replace(/[,%()]/g, " ")
+    .replace(/\s+/g, " ");
+
+  return normalized.length > 0 ? normalized : undefined;
 }
 
 export async function getPermitById(id: string) {

@@ -17,10 +17,18 @@ Copy `.env.example` to `.env.local` and populate:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `CRON_SECRET`
+- `INTERNAL_ADMIN_DOMAIN` optional, defaults to `jzdemolition.com`
+- `INTERNAL_ADMIN_EMAILS` optional comma-separated allowlist for admin-only endpoints
 
 ## Database setup
 
-Run the SQL in `supabase/migrations/001_create_permits.sql` against your Supabase project.
+For a fresh database, apply the current schema migrations in Supabase SQL editor:
+
+1. `supabase/migrations/003_create_icp_profiles.sql`
+2. `supabase/migrations/004_create_company_context.sql`
+3. `supabase/migrations/007_migrate_to_miamidade_permit_data.sql`
+
+`001_create_permits.sql` and `006_add_priority_scoring.sql` are legacy migrations from the pre-migration schema and should not be used to bootstrap a new environment.
 
 ## Local development
 

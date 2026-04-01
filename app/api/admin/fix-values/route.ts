@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
+import { isInternalAdmin } from "@/lib/auth/authorization";
 import { getServerEnv } from "@/lib/env";
 import { parseEstimatedValue } from "@/lib/permits/value";
 import { updatePriorityScores } from "@/lib/scoring/update-priority-scores";
@@ -30,7 +31,7 @@ async function isAuthorized(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  return Boolean(user);
+  return isInternalAdmin(user);
 }
 
 export async function POST(request: NextRequest) {

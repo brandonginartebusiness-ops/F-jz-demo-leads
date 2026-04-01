@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
+import { isInternalAdmin } from "@/lib/auth/authorization";
 import { createClient } from "@/lib/supabase/server";
 import { updatePriorityScores } from "@/lib/scoring/update-priority-scores";
 
@@ -14,6 +15,10 @@ export async function POST() {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!isInternalAdmin(user)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {

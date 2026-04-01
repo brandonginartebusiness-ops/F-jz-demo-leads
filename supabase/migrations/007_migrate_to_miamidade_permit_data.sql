@@ -1,3 +1,5 @@
+create extension if not exists pgcrypto;
+
 drop table if exists public.activity_feed;
 drop table if exists public.permits;
 
