@@ -1,21 +1,12 @@
 import Link from "next/link";
 
 import { PriorityBadge } from "@/components/dashboard/priority-badge";
+import { formatEstimatedValue } from "@/lib/permits/value";
 import { PermitRecord } from "@/lib/types";
 
 type Props = {
   permits: PermitRecord[];
 };
-
-function formatCurrency(value: number | null) {
-  if (value === null) return "N/A";
-
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
 
 function formatDate(value: string | null) {
   if (!value) return "N/A";
@@ -57,7 +48,7 @@ export function PermitsTable({ permits }: Props) {
                 </td>
                 <td className="px-4 py-4 text-white/80">{formatDate(permit.issued_date)}</td>
                 <td className="px-4 py-4 text-white/80">
-                  {formatCurrency(permit.estimated_value)}
+                  {formatEstimatedValue(permit.estimated_value)}
                 </td>
                 <td className="px-4 py-4">
                   <PriorityBadge

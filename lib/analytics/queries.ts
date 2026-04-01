@@ -157,7 +157,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
         totalEstimatedValue: 0,
       };
       current.permitCount += 1;
-      current.totalEstimatedValue += Math.max(estimatedValue, 0);
+      current.totalEstimatedValue += estimatedValue > 1 ? estimatedValue : 0;
       contractorMap.set(contractorName, current);
     }
 

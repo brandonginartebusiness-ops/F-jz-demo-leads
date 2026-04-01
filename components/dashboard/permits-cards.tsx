@@ -1,21 +1,12 @@
 import Link from "next/link";
 
 import { PriorityBadge } from "@/components/dashboard/priority-badge";
+import { formatEstimatedValue } from "@/lib/permits/value";
 import { PermitRecord } from "@/lib/types";
 
 type Props = {
   permits: PermitRecord[];
 };
-
-function formatCurrency(value: number | null) {
-  if (value === null) return "N/A";
-
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
 
 export function PermitsCards({ permits }: Props) {
   return (
@@ -54,7 +45,7 @@ export function PermitsCards({ permits }: Props) {
             </div>
             <div className="flex justify-between gap-4">
               <dt>Estimated value</dt>
-              <dd>{formatCurrency(permit.estimated_value)}</dd>
+              <dd>{formatEstimatedValue(permit.estimated_value)}</dd>
             </div>
           </dl>
         </Link>

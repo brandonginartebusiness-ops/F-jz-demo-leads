@@ -1,3 +1,5 @@
+import { parseEstimatedValue } from "@/lib/permits/value";
+
 type ArcGisAttributes = {
   ADDRESS?: string | null;
   STNDADDR?: string | null;
@@ -25,16 +27,6 @@ export function mapStatus(status: string | null | undefined) {
     default:
       return status?.trim() || null;
   }
-}
-
-export function parseEstimatedValue(value: string | null | undefined) {
-  if (!value) return null;
-
-  const normalized = value.replace(/[^\d]/g, "");
-  if (!normalized) return null;
-
-  const parsed = Number.parseInt(normalized, 10);
-  return Number.isNaN(parsed) ? null : parsed;
 }
 
 export function parseIssuedDate(value: number | null | undefined) {

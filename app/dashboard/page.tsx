@@ -14,7 +14,8 @@ export default async function DashboardPage({ searchParams }: Props) {
   const permits = await listPermits(searchParams);
   const companyContext = await getLatestCompanyContext();
   const totalValue = permits.reduce(
-    (sum, permit) => sum + (permit.estimated_value ?? 0),
+    (sum, permit) =>
+      sum + ((permit.estimated_value ?? 0) > 1 ? (permit.estimated_value ?? 0) : 0),
     0,
   );
 

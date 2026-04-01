@@ -5,6 +5,7 @@ import { ActivityFeedList } from "@/components/dashboard/activity-feed-list";
 import { LeadDetailForm } from "@/components/dashboard/lead-detail-form";
 import { listPermitActivity } from "@/lib/activity-feed/queries";
 import { getPermitById } from "@/lib/permits/queries";
+import { formatEstimatedValue } from "@/lib/permits/value";
 
 type Props = {
   params: {
@@ -19,16 +20,6 @@ function formatDate(value: string | null) {
     dateStyle: "full",
     timeStyle: "short",
   }).format(new Date(value));
-}
-
-function formatCurrency(value: number | null) {
-  if (value === null) return "N/A";
-
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value);
 }
 
 export default async function PermitDetailPage({ params }: Props) {
@@ -64,7 +55,7 @@ export default async function PermitDetailPage({ params }: Props) {
               <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
                 <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Estimated value</dt>
                 <dd className="mt-2 text-base text-white">
-                  {formatCurrency(permit.estimated_value)}
+                  {formatEstimatedValue(permit.estimated_value)}
                 </dd>
               </div>
               <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
