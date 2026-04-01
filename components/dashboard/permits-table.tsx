@@ -25,10 +25,10 @@ function formatDate(value: string | null) {
 
 export function PermitsTable({ permits }: Props) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+    <div className="overflow-hidden rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a]">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-white/10 text-sm">
-          <thead className="bg-white/5 text-left text-xs uppercase tracking-[0.2em] text-white/60">
+        <table className="min-w-full divide-y divide-[#FF6B00]/25 text-sm">
+          <thead className="bg-[#1f1f1f] text-left text-xs uppercase tracking-[0.2em] text-[#888888]">
             <tr>
               <th className="px-4 py-3">Address</th>
               <th className="px-4 py-3">Contractor</th>
@@ -38,17 +38,17 @@ export function PermitsTable({ permits }: Props) {
               <th className="px-4 py-3">Permit status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/10">
+          <tbody className="divide-y divide-[#FF6B00]/25">
             {permits.map((permit) => (
-              <tr key={permit.id} className="hover:bg-white/[0.03]">
+              <tr key={permit.id} className="hover:bg-[#202020]">
                 <td className="px-4 py-4">
                   <Link
-                    className="font-medium text-white transition hover:text-[#f2df9e]"
+                    className="font-medium text-white transition hover:text-[#C0C0C0]"
                     href={`/dashboard/${permit.id}`}
                   >
                     {permit.address || "Unknown address"}
                   </Link>
-                  <p className="mt-1 text-xs text-white/50">{permit.folio}</p>
+                  <p className="mt-1 text-xs text-[#888888]">{permit.folio}</p>
                 </td>
                 <td className="px-4 py-4 text-white/80">
                   {permit.contractor_name || "Unknown contractor"}
@@ -58,7 +58,7 @@ export function PermitsTable({ permits }: Props) {
                   {formatCurrency(permit.estimated_value)}
                 </td>
                 <td className="px-4 py-4">
-                  <span className="rounded-full bg-[#c9a84c]/15 px-3 py-1 text-xs font-medium text-[#f2df9e]">
+                  <span className="rounded-full bg-[#FF6B00]/15 px-3 py-1 text-xs font-medium text-[#C0C0C0]">
                     {permit.lead_status}
                   </span>
                 </td>

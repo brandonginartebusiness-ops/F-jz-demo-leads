@@ -8,13 +8,13 @@ type FiltersProps = {
 
 export function DashboardFilters({ searchParams }: FiltersProps) {
   const baseInputClassName =
-    "rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-[#c9a84c]";
+    "rounded-lg border border-[#FF6B00]/25 bg-[#1a1a1a] px-3 py-2 text-sm text-white outline-none transition focus:border-[#FF6B00]";
   const selectClassName = `${baseInputClassName} text-black`;
 
   const nextView = searchParams.view === "cards" ? "table" : "cards";
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+    <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-5">
       <form className="grid gap-4 lg:grid-cols-6">
         <input
           className={`lg:col-span-2 ${baseInputClassName}`}
@@ -90,19 +90,19 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
         <input name="view" type="hidden" value={searchParams.view ?? "table"} />
         <div className="flex gap-3 lg:col-span-6">
           <button
-            className="rounded-lg bg-[#c9a84c] px-4 py-2 text-sm font-medium text-[#11111d] transition hover:bg-[#d9b75c]"
+            className="rounded-lg bg-[#FF6B00] px-4 py-2 text-sm font-medium text-[#0a0a0a] transition hover:bg-[#FF8C00]"
             type="submit"
           >
             Apply filters
           </button>
           <Link
-            className="rounded-lg border border-white/10 px-4 py-2 text-sm text-white transition hover:border-[#c9a84c]"
+            className="rounded-lg border border-[#FF6B00]/25 px-4 py-2 text-sm text-[#C0C0C0] transition hover:border-[#FF6B00]"
             href="/dashboard"
           >
             Reset
           </Link>
           <Link
-            className="rounded-lg border border-white/10 px-4 py-2 text-sm text-white transition hover:border-[#c9a84c]"
+            className="rounded-lg border border-[#FF6B00]/25 px-4 py-2 text-sm text-[#C0C0C0] transition hover:border-[#FF6B00]"
             href={`/dashboard?${new URLSearchParams({
               ...Object.fromEntries(
                 Object.entries(searchParams).filter(([, value]) => value),
@@ -113,7 +113,7 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
             {nextView === "cards" ? "Card view" : "Table view"}
           </Link>
           <Link
-            className="rounded-lg border border-[#c9a84c]/40 px-4 py-2 text-sm text-[#f2df9e] transition hover:border-[#c9a84c]"
+            className="rounded-lg border border-[#FF6B00]/25 px-4 py-2 text-sm text-[#C0C0C0] transition hover:border-[#FF6B00]"
             href={`/api/export?${new URLSearchParams(
               Object.fromEntries(
                 Object.entries(searchParams).filter(([, value]) => value),

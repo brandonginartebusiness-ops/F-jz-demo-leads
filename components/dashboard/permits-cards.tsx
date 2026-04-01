@@ -22,7 +22,7 @@ export function PermitsCards({ permits }: Props) {
       {permits.map((permit) => (
         <Link
           key={permit.id}
-          className="rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:border-[#c9a84c]/50 hover:bg-white/[0.07]"
+          className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-5 transition hover:border-[#FF6B00] hover:bg-[#202020]"
           href={`/dashboard/${permit.id}`}
         >
           <div className="flex items-start justify-between gap-3">
@@ -30,9 +30,9 @@ export function PermitsCards({ permits }: Props) {
               <h3 className="text-lg font-semibold text-white">
                 {permit.address || "Unknown address"}
               </h3>
-              <p className="mt-1 text-sm text-white/50">{permit.folio}</p>
+              <p className="mt-1 text-sm text-[#888888]">{permit.folio}</p>
             </div>
-            <span className="rounded-full bg-[#c9a84c]/15 px-3 py-1 text-xs font-medium text-[#f2df9e]">
+            <span className="rounded-full bg-[#FF6B00]/15 px-3 py-1 text-xs font-medium text-[#C0C0C0]">
               {permit.lead_status}
             </span>
           </div>

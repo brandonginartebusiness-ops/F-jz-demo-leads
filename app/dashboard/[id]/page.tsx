@@ -36,63 +36,63 @@ export default async function PermitDetailPage({ params }: Props) {
     return (
       <main className="mx-auto min-h-screen max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <Link className="text-sm text-[#f2df9e] hover:text-white" href="/dashboard">
+          <Link className="text-sm text-[#C0C0C0] hover:text-white" href="/dashboard">
             Back to dashboard
           </Link>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <section className="space-y-6 rounded-3xl border border-white/10 bg-white/5 p-6">
+          <section className="space-y-6 rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
             <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-[#f2df9e]">
+              <p className="text-sm uppercase tracking-[0.3em] text-[#C0C0C0]">
                 Permit detail
               </p>
               <h1 className="mt-3 text-3xl font-semibold text-white">
                 {permit.address || "Unknown address"}
               </h1>
-              <p className="mt-2 text-sm text-white/60">FOLIO {permit.folio || "N/A"}</p>
+              <p className="mt-2 text-sm text-[#888888]">FOLIO {permit.folio || "N/A"}</p>
             </div>
 
             <dl className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-white/10 bg-[#11111d] p-4">
-                <dt className="text-xs uppercase tracking-[0.2em] text-white/45">Issued</dt>
+              <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
+                <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Issued</dt>
                 <dd className="mt-2 text-base text-white">{formatDate(permit.issued_date)}</dd>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-[#11111d] p-4">
-                <dt className="text-xs uppercase tracking-[0.2em] text-white/45">Estimated value</dt>
+              <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
+                <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Estimated value</dt>
                 <dd className="mt-2 text-base text-white">
                   {formatCurrency(permit.estimated_value)}
                 </dd>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-[#11111d] p-4">
-                <dt className="text-xs uppercase tracking-[0.2em] text-white/45">Contractor</dt>
+              <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
+                <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Contractor</dt>
                 <dd className="mt-2 text-base text-white">
                   {permit.contractor_name || "Unknown contractor"}
                 </dd>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-[#11111d] p-4">
-                <dt className="text-xs uppercase tracking-[0.2em] text-white/45">Permit status</dt>
+              <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
+                <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Permit status</dt>
                 <dd className="mt-2 text-base text-white">{permit.status || "N/A"}</dd>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-[#11111d] p-4 sm:col-span-2">
-                <dt className="text-xs uppercase tracking-[0.2em] text-white/45">Description</dt>
+              <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4 sm:col-span-2">
+                <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Description</dt>
                 <dd className="mt-2 text-base text-white">{permit.description || "N/A"}</dd>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-[#11111d] p-4 sm:col-span-2">
-                <dt className="text-xs uppercase tracking-[0.2em] text-white/45">Standardized address</dt>
+              <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4 sm:col-span-2">
+                <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Standardized address</dt>
                 <dd className="mt-2 text-base text-white">
                   {permit.standardized_address || "N/A"}
                 </dd>
               </div>
             </dl>
 
-            <div className="rounded-2xl border border-white/10 bg-[#11111d] p-4">
+            <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-sm uppercase tracking-[0.2em] text-white/45">
+                  <h2 className="text-sm uppercase tracking-[0.2em] text-[#888888]">
                     Source record
                   </h2>
-                  <p className="mt-2 text-sm text-white/60">
+                  <p className="mt-2 text-sm text-[#888888]">
                     This is the original permit data returned by the county feed for
                     this record.
                   </p>

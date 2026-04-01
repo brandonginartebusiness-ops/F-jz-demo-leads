@@ -45,7 +45,7 @@ export function LoginForm({ redirectTo = "/dashboard" }: Props) {
           Email
         </label>
         <input
-          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-[#c9a84c]"
+          className="w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
           id="email"
           name="email"
           placeholder="team@jzdemolition.com"
@@ -59,7 +59,7 @@ export function LoginForm({ redirectTo = "/dashboard" }: Props) {
           Password
         </label>
         <input
-          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-[#c9a84c]"
+          className="w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
           id="password"
           name="password"
           required
@@ -74,7 +74,7 @@ export function LoginForm({ redirectTo = "/dashboard" }: Props) {
       ) : null}
 
       <button
-        className="w-full rounded-xl bg-[#c9a84c] px-4 py-3 font-medium text-[#11111d] transition hover:bg-[#d9b75c] disabled:cursor-not-allowed disabled:opacity-70"
+        className="w-full rounded-xl bg-[#FF6B00] px-4 py-3 font-medium text-[#0a0a0a] transition hover:bg-[#FF8C00] disabled:cursor-not-allowed disabled:opacity-70"
         disabled={loading}
         type="submit"
       >

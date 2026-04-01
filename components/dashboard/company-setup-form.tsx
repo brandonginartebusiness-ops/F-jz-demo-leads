@@ -110,15 +110,15 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
   }
 
   return (
-    <div className="space-y-6 rounded-3xl border border-white/10 bg-white/5 p-6">
+    <div className="space-y-6 rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
       <div>
-        <div className="mb-4 h-2 overflow-hidden rounded-full bg-white/10">
+        <div className="mb-4 h-2 overflow-hidden rounded-full bg-[#262626]">
           <div
-            className="h-full rounded-full bg-[#c9a84c] transition-all"
+            className="h-full rounded-full bg-[#FF6B00] transition-all"
             style={{ width: `${(step / 3) * 100}%` }}
           />
         </div>
-        <p className="text-sm uppercase tracking-[0.3em] text-[#f2df9e]">
+        <p className="text-sm uppercase tracking-[0.3em] text-[#C0C0C0]">
           Step {step} of 3
         </p>
       </div>
@@ -133,7 +133,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
               Company name
             </label>
             <input
-              className="w-full rounded-xl border border-white/10 bg-[#11111d] px-4 py-3 text-white outline-none transition focus:border-[#c9a84c]"
+              className="w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
               id="company-name"
               onChange={(event) => updateField("company_name", event.target.value)}
               value={form.company_name}
@@ -152,7 +152,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
               Offering
             </label>
             <textarea
-              className="min-h-36 w-full rounded-xl border border-white/10 bg-[#11111d] px-4 py-3 text-white outline-none transition focus:border-[#c9a84c]"
+              className="min-h-36 w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
               id="offering"
               onChange={(event) => updateField("offering", event.target.value)}
               placeholder="Commercial demolition, selective interior demo, structural tear-outs, and site clearing."
@@ -172,7 +172,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
               Value proposition
             </label>
             <textarea
-              className="min-h-36 w-full rounded-xl border border-white/10 bg-[#11111d] px-4 py-3 text-white outline-none transition focus:border-[#c9a84c]"
+              className="min-h-36 w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
               id="value-prop"
               onChange={(event) => updateField("value_prop", event.target.value)}
               placeholder="We help owners and GCs move quickly through demolition scopes with fast estimating and safe field execution."
@@ -188,7 +188,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
               Differentiators
             </label>
             <textarea
-              className="min-h-36 w-full rounded-xl border border-white/10 bg-[#11111d] px-4 py-3 text-white outline-none transition focus:border-[#c9a84c]"
+              className="min-h-36 w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
               id="differentiators"
               onChange={(event) => updateField("differentiators", event.target.value)}
               placeholder="Union-ready crews, quick mobilization, clear scopes, and responsive preconstruction support."
@@ -204,7 +204,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
               Target market
             </label>
             <textarea
-              className="min-h-28 w-full rounded-xl border border-white/10 bg-[#11111d] px-4 py-3 text-white outline-none transition focus:border-[#c9a84c]"
+              className="min-h-28 w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
               id="target-market"
               onChange={(event) => updateField("target_market", event.target.value)}
               placeholder="Commercial property owners, healthcare facilities, retail redevelopments, and tenant improvement teams."
@@ -220,7 +220,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
               Average project size
             </label>
             <select
-              className="w-full rounded-xl border border-white/10 bg-[#11111d] px-4 py-3 text-white outline-none transition focus:border-[#c9a84c]"
+              className="w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
               id="avg-project-size"
               onChange={(event) =>
                 updateField(
@@ -253,22 +253,22 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
                     key={option}
                     className={`rounded-2xl border p-4 text-left transition ${
                       selected
-                        ? "border-[#c9a84c] bg-[#c9a84c]/10"
-                        : "border-white/10 bg-[#11111d] hover:border-[#c9a84c]/50"
+                        ? "border-[#FF6B00] bg-[#FF6B00]/10"
+                        : "border-[#FF6B00]/25 bg-[#1a1a1a] hover:border-[#FF6B00]"
                     }`}
                     onClick={() => updateField("tone", option)}
                     type="button"
                   >
                     <p className="font-medium text-white">{option}</p>
-                    <p className="mt-2 text-sm text-white/60">{tonePreviewCopy[option]}</p>
+                    <p className="mt-2 text-sm text-[#888888]">{tonePreviewCopy[option]}</p>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-[#11111d] p-5">
-            <p className="text-xs uppercase tracking-[0.2em] text-white/45">Tone preview</p>
+          <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-5">
+            <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">Tone preview</p>
             <p className="mt-3 text-sm leading-7 text-white/80">
               {tonePreviewCopy[form.tone]}
             </p>
@@ -281,7 +281,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
           className={`rounded-2xl border px-4 py-3 text-sm ${
             error
               ? "border-[#c05a4f]/40 bg-[#c05a4f]/10 text-[#f2c4bf]"
-              : "border-[#c9a84c]/30 bg-[#c9a84c]/10 text-[#f2df9e]"
+              : "border-[#FF6B00]/25 bg-[#FF6B00]/10 text-[#C0C0C0]"
           }`}
         >
           {error ?? success}
@@ -291,7 +291,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
       <div className="flex flex-wrap gap-3">
         {step > 1 ? (
           <button
-            className="rounded-xl border border-white/10 px-4 py-3 text-sm text-white transition hover:border-[#c9a84c]"
+            className="rounded-xl border border-[#FF6B00]/25 px-4 py-3 text-sm text-[#C0C0C0] transition hover:border-[#FF6B00]"
             onClick={() => setStep((current) => current - 1)}
             type="button"
           >
@@ -301,7 +301,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
 
         {step < 3 ? (
           <button
-            className="rounded-xl bg-[#c9a84c] px-4 py-3 text-sm font-medium text-[#11111d] transition hover:bg-[#d9b75c]"
+            className="rounded-xl bg-[#FF6B00] px-4 py-3 text-sm font-medium text-[#0a0a0a] transition hover:bg-[#FF8C00]"
             onClick={() => setStep((current) => current + 1)}
             type="button"
           >
@@ -309,7 +309,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
           </button>
         ) : (
           <button
-            className="rounded-xl bg-[#c9a84c] px-4 py-3 text-sm font-medium text-[#11111d] transition hover:bg-[#d9b75c] disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-xl bg-[#FF6B00] px-4 py-3 text-sm font-medium text-[#0a0a0a] transition hover:bg-[#FF8C00] disabled:cursor-not-allowed disabled:opacity-60"
             disabled={isSaving}
             onClick={handleSubmit}
             type="button"

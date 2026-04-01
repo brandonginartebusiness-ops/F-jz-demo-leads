@@ -42,12 +42,12 @@ export function TagInput({
   return (
     <div>
       <label className="mb-2 block text-sm font-medium text-white">{label}</label>
-      <div className="rounded-2xl border border-white/10 bg-[#11111d] p-3">
+      <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-3">
         <div className="flex flex-wrap gap-2">
           {values.map((value) => (
             <button
               key={value}
-              className="rounded-full border border-[#c9a84c]/30 bg-[#c9a84c]/10 px-3 py-1 text-sm text-[#f2df9e] transition hover:border-[#c9a84c]"
+              className="rounded-full border border-[#FF6B00]/25 bg-[#FF6B00]/10 px-3 py-1 text-sm text-[#C0C0C0] transition hover:border-[#FF6B00]"
               onClick={() => removeValue(value)}
               type="button"
             >
@@ -57,7 +57,7 @@ export function TagInput({
         </div>
 
         <input
-          className="mt-3 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-[#c9a84c]"
+          className="mt-3 w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
@@ -79,8 +79,8 @@ export function TagInput({
                   key={preset}
                   className={`rounded-full border px-3 py-1 text-sm transition ${
                     isSelected
-                      ? "border-[#c9a84c] bg-[#c9a84c] text-[#11111d]"
-                      : "border-white/10 bg-white/5 text-white hover:border-[#c9a84c]"
+                      ? "border-[#FF6B00] bg-[#FF6B00] text-[#0a0a0a]"
+                      : "border-[#FF6B00]/25 bg-[#1a1a1a] text-[#C0C0C0] hover:border-[#FF6B00]"
                   }`}
                   onClick={() => addValue(preset)}
                   type="button"

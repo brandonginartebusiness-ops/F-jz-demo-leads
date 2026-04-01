@@ -7,7 +7,7 @@ type Props = {
 
 export function LeadDetailForm({ permit }: Props) {
   return (
-    <form action={updatePermit} className="space-y-5 rounded-2xl border border-white/10 bg-white/5 p-6">
+    <form action={updatePermit} className="space-y-5 rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
       <input name="id" type="hidden" value={permit.id} />
 
       <div>
@@ -15,7 +15,7 @@ export function LeadDetailForm({ permit }: Props) {
           Lead status
         </label>
         <select
-          className="w-full rounded-xl border border-white/10 bg-[#11111d] px-4 py-3 text-white outline-none transition focus:border-[#c9a84c]"
+          className="w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
           defaultValue={permit.lead_status}
           id="lead_status"
           name="lead_status"
@@ -40,7 +40,7 @@ export function LeadDetailForm({ permit }: Props) {
           Notes
         </label>
         <textarea
-          className="min-h-40 w-full rounded-xl border border-white/10 bg-[#11111d] px-4 py-3 text-white outline-none transition focus:border-[#c9a84c]"
+          className="min-h-40 w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
           defaultValue={permit.notes ?? ""}
           id="notes"
           name="notes"
@@ -49,7 +49,7 @@ export function LeadDetailForm({ permit }: Props) {
       </div>
 
       <button
-        className="rounded-xl bg-[#c9a84c] px-4 py-3 font-medium text-[#11111d] transition hover:bg-[#d9b75c]"
+        className="rounded-xl bg-[#FF6B00] px-4 py-3 font-medium text-[#0a0a0a] transition hover:bg-[#FF8C00]"
         type="submit"
       >
         Save lead details

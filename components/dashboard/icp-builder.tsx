@@ -148,15 +148,15 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
   return (
     <>
       <div className="space-y-6">
-        <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
+        <section className="rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
           <div className="mb-6">
-            <p className="text-sm uppercase tracking-[0.3em] text-[#f2df9e]">
+            <p className="text-sm uppercase tracking-[0.3em] text-[#C0C0C0]">
               New ICP profile
             </p>
             <h2 className="mt-3 text-2xl font-semibold text-white">
               Define your ideal demolition buyer
             </h2>
-            <p className="mt-2 max-w-3xl text-sm text-white/65">
+            <p className="mt-2 max-w-3xl text-sm text-[#888888]">
               Save target industries, buyer titles, employee ranges, and locations
               so your pipeline can reuse them later.
             </p>
@@ -171,7 +171,7 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
                 Profile name
               </label>
               <input
-                className="w-full rounded-xl border border-white/10 bg-[#11111d] px-4 py-3 text-white outline-none transition focus:border-[#c9a84c]"
+                className="w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
                 id="profile-name"
                 onChange={(event) =>
                   setForm((current) => ({ ...current, name: event.target.value }))
@@ -201,7 +201,7 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
                 Min employees
               </label>
               <input
-                className="w-full rounded-xl border border-white/10 bg-[#11111d] px-4 py-3 text-white outline-none transition focus:border-[#c9a84c]"
+                className="w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
                 id="company-size-min"
                 min={0}
                 onChange={(event) =>
@@ -224,7 +224,7 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
                 Max employees
               </label>
               <input
-                className="w-full rounded-xl border border-white/10 bg-[#11111d] px-4 py-3 text-white outline-none transition focus:border-[#c9a84c]"
+                className="w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
                 id="company-size-max"
                 min={0}
                 onChange={(event) =>
@@ -268,7 +268,7 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
                   className={`rounded-2xl border px-4 py-3 text-sm ${
                     error
                       ? "border-[#c05a4f]/40 bg-[#c05a4f]/10 text-[#f2c4bf]"
-                      : "border-[#c9a84c]/30 bg-[#c9a84c]/10 text-[#f2df9e]"
+                      : "border-[#FF6B00]/25 bg-[#FF6B00]/10 text-[#C0C0C0]"
                   }`}
                 >
                   {error ?? success}
@@ -278,7 +278,7 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
 
             <div className="lg:col-span-2">
               <button
-                className="rounded-xl bg-[#c9a84c] px-5 py-3 font-medium text-[#11111d] transition hover:bg-[#d9b75c] disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-xl bg-[#FF6B00] px-5 py-3 font-medium text-[#0a0a0a] transition hover:bg-[#FF8C00] disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={!canSubmit || isSaving}
                 type="submit"
               >
@@ -288,24 +288,24 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
           </form>
         </section>
 
-        <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
+        <section className="rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
           <div className="mb-6 flex items-end justify-between gap-4">
             <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-[#f2df9e]">
+              <p className="text-sm uppercase tracking-[0.3em] text-[#C0C0C0]">
                 Saved ICP profiles
               </p>
               <h2 className="mt-3 text-2xl font-semibold text-white">
                 Reusable targeting profiles
               </h2>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-[#11111d] px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.2em] text-white/45">Profiles</p>
+            <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3">
+              <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">Profiles</p>
               <p className="mt-1 text-xl font-semibold text-white">{profiles.length}</p>
             </div>
           </div>
 
           {profiles.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.03] p-10 text-center text-white/60">
+            <div className="rounded-2xl border border-dashed border-[#FF6B00]/25 bg-[#1a1a1a] p-10 text-center text-[#888888]">
               No ICP profiles yet. Create your first profile to define who the team
               should target next.
             </div>
@@ -314,23 +314,23 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
               {profiles.map((profile) => (
                 <article
                   key={profile.id}
-                  className="rounded-2xl border border-white/10 bg-[#11111d] p-5"
+                  className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-5"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h3 className="text-lg font-semibold text-white">{profile.name}</h3>
-                      <p className="mt-1 text-sm text-white/50">
+                      <p className="mt-1 text-sm text-[#888888]">
                         {profile.locations?.join(", ") || DEFAULT_LOCATION}
                       </p>
                     </div>
-                    <span className="rounded-full bg-[#c9a84c]/15 px-3 py-1 text-xs font-medium text-[#f2df9e]">
+                    <span className="rounded-full bg-[#FF6B00]/15 px-3 py-1 text-xs font-medium text-[#C0C0C0]">
                       Active
                     </span>
                   </div>
 
                   <dl className="mt-5 space-y-4 text-sm">
                     <div>
-                      <dt className="text-xs uppercase tracking-[0.2em] text-white/45">
+                      <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">
                         Industries
                       </dt>
                       <dd className="mt-2 text-white/80">
@@ -340,7 +340,7 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs uppercase tracking-[0.2em] text-white/45">
+                      <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">
                         Job titles
                       </dt>
                       <dd className="mt-2 text-white/80">
@@ -350,7 +350,7 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs uppercase tracking-[0.2em] text-white/45">
+                      <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">
                         Company size
                       </dt>
                       <dd className="mt-2 text-white/80">
@@ -364,14 +364,14 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
 
                   <div className="mt-6 flex flex-wrap gap-3">
                     <button
-                      className="rounded-xl border border-white/10 px-4 py-3 text-sm text-white/45"
+                      className="rounded-xl border border-[#FF6B00]/25 px-4 py-3 text-sm text-[#888888]"
                       disabled
                       type="button"
                     >
                       Use in Pipeline
                     </button>
                     <button
-                      className="rounded-xl border border-white/10 px-4 py-3 text-sm text-white transition hover:border-[#c05a4f] hover:text-[#f2c4bf]"
+                      className="rounded-xl border border-[#FF6B00]/25 px-4 py-3 text-sm text-[#C0C0C0] transition hover:border-[#c05a4f] hover:text-[#f2c4bf]"
                       onClick={() => setProfileToDelete(profile)}
                       type="button"
                     >
