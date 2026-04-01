@@ -9,9 +9,14 @@ type ActivityFeedRow = {
   new_value: string | null;
   note: string | null;
   created_at: string | null;
-  permit: {
-    address: string | null;
-  } | null;
+  permit:
+    | {
+        address: string | null;
+      }
+    | Array<{
+        address: string | null;
+      }>
+    | null;
 };
 
 export async function listActivityFeed(actionType?: ActivityActionType) {
@@ -80,6 +85,8 @@ function mapActivityRows(rows: ActivityFeedRow[]): ActivityFeedRecord[] {
     new_value: row.new_value,
     note: row.note,
     created_at: row.created_at,
-    permit_address: row.permit?.address ?? null,
+    permit_address: Array.isArray(row.permit)
+      ? (row.permit[0]?.address ?? null)
+      : (row.permit?.address ?? null),
   }));
 }
