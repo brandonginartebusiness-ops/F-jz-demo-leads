@@ -86,7 +86,7 @@ export function AnalyticsDashboard() {
 
   return (
     <>
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <div className="rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-5">
           <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">Total permits</p>
           <p className="mt-3 text-3xl font-semibold text-white">
@@ -109,6 +109,12 @@ export function AnalyticsDashboard() {
           <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">Leads contacted</p>
           <p className="mt-3 text-3xl font-semibold text-white">
             {analytics.topStats.leadsContacted.toLocaleString()}
+          </p>
+        </div>
+        <div className="rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-5">
+          <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">Actions this week</p>
+          <p className="mt-3 text-3xl font-semibold text-white">
+            {analytics.topStats.activityThisWeek.toLocaleString()}
           </p>
         </div>
       </section>

@@ -38,6 +38,19 @@ export async function GET(request: NextRequest) {
     }
 
     const permits = Array.from(dedupedPermits.values());
+    const folios = permits.map((permit) => permit.folio).filter(Boolean) as string[];
+    const { data: existingPermits, error: existingPermitsError } = folios.length
+      ? await admin.from("permits").select("folio").in("folio", folios)
+      : { data: [], error: null };
+
+    if (existingPermitsError) {
+      throw existingPermitsError;
+    }
+
+    const existingFolios = new Set((existingPermits ?? []).map((permit) => permit.folio));
+    const newFolios = permits
+      .filter((permit) => permit.folio && !existingFolios.has(permit.folio))
+      .map((permit) => permit.folio as string);
 
     const { error } = await admin.from("permits").upsert(permits, {
       onConflict: "folio",
@@ -48,11 +61,39 @@ export async function GET(request: NextRequest) {
       throw error;
     }
 
+    if (newFolios.length > 0) {
+      const { data: insertedPermits, error: insertedPermitsError } = await admin
+        .from("permits")
+        .select("id, folio")
+        .in("folio", newFolios);
+
+      if (insertedPermitsError) {
+        throw insertedPermitsError;
+      }
+
+      if ((insertedPermits ?? []).length > 0) {
+        const { error: activityError } = await admin.from("activity_feed").insert(
+          insertedPermits.map((permit) => ({
+            permit_id: permit.id,
+            action_type: "permit_synced",
+            old_value: null,
+            new_value: permit.folio,
+            note: null,
+          })),
+        );
+
+        if (activityError) {
+          throw activityError;
+        }
+      }
+    }
+
     return NextResponse.json({
       success: true,
       fetched: features.length,
       upserted: permits.length,
       skipped,
+      newPermitsLogged: newFolios.length,
     });
   } catch (error) {
     const message =

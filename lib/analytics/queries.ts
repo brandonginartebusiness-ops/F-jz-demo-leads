@@ -19,6 +19,7 @@ export type AnalyticsData = {
     pipelineValue: number;
     newThisWeek: number;
     leadsContacted: number;
+    activityThisWeek: number;
   };
   leadStatusBreakdown: Array<{
     name: LeadStatusKey;
@@ -93,6 +94,15 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   let newThisWeek = 0;
   let leadsContacted = 0;
 
+  const { count: activityThisWeek, error: activityError } = await supabase
+    .from("activity_feed")
+    .select("id", { count: "exact", head: true })
+    .gte("created_at", sevenDaysAgo.toISOString());
+
+  if (activityError) {
+    throw activityError;
+  }
+
   for (const permit of permits) {
     const estimatedValue = permit.estimated_value ?? 0;
     const issuedDate = permit.issued_date ? new Date(permit.issued_date) : null;
@@ -145,6 +155,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
       pipelineValue,
       newThisWeek,
       leadsContacted,
+      activityThisWeek: activityThisWeek ?? 0,
     },
     leadStatusBreakdown: LEAD_STATUS_ORDER.map((name) => ({
       name,

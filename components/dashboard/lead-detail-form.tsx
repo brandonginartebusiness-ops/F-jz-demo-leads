@@ -1,4 +1,8 @@
-import { updatePermit } from "@/app/actions";
+"use client";
+
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import { PermitRecord } from "@/lib/types";
 
 type Props = {
@@ -6,10 +10,57 @@ type Props = {
 };
 
 export function LeadDetailForm({ permit }: Props) {
-  return (
-    <form action={updatePermit} className="space-y-5 rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
-      <input name="id" type="hidden" value={permit.id} />
+  const router = useRouter();
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSaving(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    const formData = new FormData(event.currentTarget);
+    const payload = {
+      lead_status: String(formData.get("lead_status") ?? "new"),
+      notes: String(formData.get("notes") ?? ""),
+    };
+
+    try {
+      const response = await fetch(`/api/permits/${permit.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const result = (await response.json().catch(() => null)) as
+          | { error?: string }
+          | null;
+        throw new Error(result?.error ?? "Failed to save lead details.");
+      }
+
+      setSuccessMessage("Lead details saved.");
+      router.refresh();
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Failed to save lead details.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  return (
+    <form
+      className="space-y-5 rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6"
+      onSubmit={handleSubmit}
+    >
       <div>
         <label className="mb-2 block text-sm font-medium text-white" htmlFor="lead_status">
           Lead status
@@ -49,11 +100,15 @@ export function LeadDetailForm({ permit }: Props) {
       </div>
 
       <button
-        className="rounded-xl bg-[#FF6B00] px-4 py-3 font-medium text-[#0a0a0a] transition hover:bg-[#FF8C00]"
+        className="rounded-xl bg-[#FF6B00] px-4 py-3 font-medium text-[#0a0a0a] transition hover:bg-[#FF8C00] disabled:cursor-not-allowed disabled:opacity-60"
+        disabled={isSaving}
         type="submit"
       >
-        Save lead details
+        {isSaving ? "Saving..." : "Save lead details"}
       </button>
+
+      {error ? <p className="text-sm text-[#ff8a80]">{error}</p> : null}
+      {successMessage ? <p className="text-sm text-[#C0C0C0]">{successMessage}</p> : null}
     </form>
   );
 }

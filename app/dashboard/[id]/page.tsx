@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ActivityFeedList } from "@/components/dashboard/activity-feed-list";
 import { LeadDetailForm } from "@/components/dashboard/lead-detail-form";
+import { listPermitActivity } from "@/lib/activity-feed/queries";
 import { getPermitById } from "@/lib/permits/queries";
 
 type Props = {
@@ -32,6 +34,7 @@ function formatCurrency(value: number | null) {
 export default async function PermitDetailPage({ params }: Props) {
   try {
     const permit = await getPermitById(params.id);
+    const recentActivity = await listPermitActivity(params.id, 5);
 
     return (
       <main className="mx-auto min-h-screen max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
@@ -105,7 +108,24 @@ export default async function PermitDetailPage({ params }: Props) {
           </section>
 
           <aside>
-            <LeadDetailForm permit={permit} />
+            <div className="space-y-6">
+              <LeadDetailForm permit={permit} />
+
+              <section className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
+                <div className="mb-4">
+                  <h2 className="text-lg font-semibold text-white">Recent activity</h2>
+                  <p className="mt-1 text-sm text-[#888888]">
+                    The latest five updates for this lead, newest first.
+                  </p>
+                </div>
+
+                <ActivityFeedList
+                  compact
+                  emptyState="No activity has been recorded for this lead yet."
+                  entries={recentActivity}
+                />
+              </section>
+            </div>
           </aside>
         </div>
       </main>

@@ -1,4 +1,5 @@
 export type LeadStatus = "new" | "bookmarked" | "contacted" | "closed";
+export type ActivityActionType = "status_change" | "note_added" | "permit_synced";
 
 export type PermitRecord = {
   id: string;
@@ -18,3 +19,14 @@ export type PermitRecord = {
 };
 
 export type PermitUpdate = Pick<PermitRecord, "lead_status" | "notes">;
+
+export type ActivityFeedRecord = {
+  id: string;
+  permit_id: string | null;
+  action_type: ActivityActionType | null;
+  old_value: string | null;
+  new_value: string | null;
+  note: string | null;
+  created_at: string | null;
+  permit_address: string | null;
+};

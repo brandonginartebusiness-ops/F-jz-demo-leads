@@ -5,7 +5,8 @@ type DashboardNavProps = {
     | "/dashboard"
     | "/dashboard/setup"
     | "/dashboard/icp"
-    | "/dashboard/analytics";
+    | "/dashboard/analytics"
+    | "/dashboard/activity";
   showSetupWarning: boolean;
 };
 
@@ -13,6 +14,7 @@ const links = [
   { label: "Dashboard", href: "/dashboard" },
   { label: "Setup", href: "/dashboard/setup" },
   { label: "ICP Builder", href: "/dashboard/icp" },
+  { label: "Activity", href: "/dashboard/activity" },
   { label: "Analytics", href: "/dashboard/analytics" },
 ] as const;
 
