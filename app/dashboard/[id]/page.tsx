@@ -87,7 +87,17 @@ export default async function PermitDetailPage({ params }: Props) {
             </dl>
 
             <div className="rounded-2xl border border-white/10 bg-[#11111d] p-4">
-              <h2 className="text-sm uppercase tracking-[0.2em] text-white/45">Raw payload</h2>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-sm uppercase tracking-[0.2em] text-white/45">
+                    Source record
+                  </h2>
+                  <p className="mt-2 text-sm text-white/60">
+                    This is the original permit data returned by the county feed for
+                    this record.
+                  </p>
+                </div>
+              </div>
               <pre className="mt-4 overflow-x-auto text-xs text-white/70">
                 {JSON.stringify(permit.raw_data, null, 2)}
               </pre>

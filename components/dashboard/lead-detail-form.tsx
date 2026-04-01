@@ -20,10 +20,18 @@ export function LeadDetailForm({ permit }: Props) {
           id="lead_status"
           name="lead_status"
         >
-          <option value="new">New</option>
-          <option value="bookmarked">Bookmarked</option>
-          <option value="contacted">Contacted</option>
-          <option value="closed">Closed</option>
+          <option className="text-black" value="new">
+            New
+          </option>
+          <option className="text-black" value="bookmarked">
+            Bookmarked
+          </option>
+          <option className="text-black" value="contacted">
+            Contacted
+          </option>
+          <option className="text-black" value="closed">
+            Closed
+          </option>
         </select>
       </div>
 

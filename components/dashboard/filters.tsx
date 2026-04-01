@@ -9,6 +9,7 @@ type FiltersProps = {
 export function DashboardFilters({ searchParams }: FiltersProps) {
   const baseInputClassName =
     "rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-[#c9a84c]";
+  const selectClassName = `${baseInputClassName} text-black`;
 
   const nextView = searchParams.view === "cards" ? "table" : "cards";
 
@@ -22,15 +23,25 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
           placeholder="Search address or contractor"
         />
         <select
-          className={baseInputClassName}
+          className={selectClassName}
           defaultValue={searchParams.leadStatus ?? ""}
           name="leadStatus"
         >
-          <option value="">All statuses</option>
-          <option value="new">New</option>
-          <option value="bookmarked">Bookmarked</option>
-          <option value="contacted">Contacted</option>
-          <option value="closed">Closed</option>
+          <option className="text-black" value="">
+            All statuses
+          </option>
+          <option className="text-black" value="new">
+            New
+          </option>
+          <option className="text-black" value="bookmarked">
+            Bookmarked
+          </option>
+          <option className="text-black" value="contacted">
+            Contacted
+          </option>
+          <option className="text-black" value="closed">
+            Closed
+          </option>
         </select>
         <input
           className={baseInputClassName}
@@ -45,14 +56,22 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
           type="date"
         />
         <select
-          className={baseInputClassName}
+          className={selectClassName}
           defaultValue={searchParams.sort ?? "date_desc"}
           name="sort"
         >
-          <option value="date_desc">Newest first</option>
-          <option value="date_asc">Oldest first</option>
-          <option value="value_desc">Highest value</option>
-          <option value="value_asc">Lowest value</option>
+          <option className="text-black" value="date_desc">
+            Newest first
+          </option>
+          <option className="text-black" value="date_asc">
+            Oldest first
+          </option>
+          <option className="text-black" value="value_desc">
+            Highest value
+          </option>
+          <option className="text-black" value="value_asc">
+            Lowest value
+          </option>
         </select>
         <input
           className={baseInputClassName}
