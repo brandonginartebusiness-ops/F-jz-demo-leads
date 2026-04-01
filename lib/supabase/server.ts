@@ -15,11 +15,13 @@ export function createClient() {
         get(name: string) {
           return cookieStore.get(name)?.value;
         },
-        set(name: string, value: string, options) {
-          cookieStore.set({ name, value, ...options });
+        set() {
+          // Server Components can read cookies but must not mutate them.
+          // Auth cookie refreshes are handled in middleware/route handlers.
         },
-        remove(name: string, options) {
-          cookieStore.set({ name, value: "", ...options });
+        remove() {
+          // Server Components can read cookies but must not mutate them.
+          // Auth cookie refreshes are handled in middleware/route handlers.
         },
       },
     },
