@@ -20,7 +20,7 @@ type AnalyticsChartsProps = Pick<
   "leadStatusBreakdown" | "permitsOverTime"
 >;
 
-const PIE_COLORS = ["#FF6B00", "#FF8C00", "#C0C0C0", "#888888"];
+const PIE_COLORS = ["#FF6B00", "#FF9A52", "#888888", "#B3B3B3"];
 
 export function AnalyticsCharts({
   leadStatusBreakdown,
@@ -107,7 +107,7 @@ export function AnalyticsCharts({
                 stroke="#FF6B00"
                 strokeWidth={3}
                 dot={{ r: 4, fill: "#FF6B00" }}
-                activeDot={{ r: 6, fill: "#FF8C00" }}
+                activeDot={{ r: 6, fill: "#888888" }}
               />
             </LineChart>
           </ResponsiveContainer>
