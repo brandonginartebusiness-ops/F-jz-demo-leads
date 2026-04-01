@@ -3,6 +3,8 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { LeadTypeBadge } from "@/components/dashboard/lead-type-badge";
+import { PriorityBadge } from "@/components/dashboard/priority-badge";
 import { PermitRecord } from "@/lib/types";
 
 type Props = {
@@ -61,6 +63,17 @@ export function LeadDetailForm({ permit }: Props) {
       className="space-y-5 rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6"
       onSubmit={handleSubmit}
     >
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <p className="mb-2 block text-sm font-medium text-white">Lead type</p>
+          <LeadTypeBadge leadType={permit.lead_type} />
+        </div>
+        <div>
+          <p className="mb-2 block text-sm font-medium text-white">Priority</p>
+          <PriorityBadge score={permit.priority_score} />
+        </div>
+      </div>
+
       <div>
         <label className="mb-2 block text-sm font-medium text-white" htmlFor="lead_status">
           Lead status

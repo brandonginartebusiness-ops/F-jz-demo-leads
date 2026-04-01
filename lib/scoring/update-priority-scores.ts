@@ -8,6 +8,7 @@ type ScoringPermitRow = Pick<
   | "permit_issued_date"
   | "detail_description"
   | "estimated_value"
+  | "lead_type"
   | "residential_commercial"
   | "square_footage"
   | "structure_floors"
@@ -18,7 +19,7 @@ export async function updatePriorityScores() {
   const { data, error } = await admin
     .from("permits")
     .select(
-      "id, permit_issued_date, detail_description, estimated_value, residential_commercial, square_footage, structure_floors",
+      "id, permit_issued_date, detail_description, estimated_value, lead_type, residential_commercial, square_footage, structure_floors",
     );
 
   if (error) {

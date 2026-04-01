@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { LeadTypeBadge } from "@/components/dashboard/lead-type-badge";
 import { PriorityBadge } from "@/components/dashboard/priority-badge";
 import { formatEstimatedValue } from "@/lib/permits/value";
 import { PermitRecord } from "@/lib/types";
@@ -22,9 +23,10 @@ export function PermitsTable({ permits }: Props) {
         <table className="min-w-full divide-y divide-[#FF6B00]/25 text-sm">
           <thead className="bg-[#1f1f1f] text-left text-xs uppercase tracking-[0.2em] text-[#888888]">
             <tr>
+              <th className="px-4 py-3">Date</th>
               <th className="px-4 py-3">Address</th>
+              <th className="px-4 py-3">Type</th>
               <th className="px-4 py-3">Description</th>
-              <th className="px-4 py-3">Issued</th>
               <th className="px-4 py-3">Value</th>
               <th className="px-4 py-3">Sq Ft</th>
               <th className="px-4 py-3">Floors</th>
@@ -38,6 +40,7 @@ export function PermitsTable({ permits }: Props) {
           <tbody className="divide-y divide-[#FF6B00]/25">
             {permits.map((permit) => (
               <tr key={permit.id} className="hover:bg-[#202020]">
+                <td className="px-4 py-4 text-white/80">{formatDate(permit.permit_issued_date)}</td>
                 <td className="px-4 py-4">
                   <Link
                     className="font-medium text-white transition hover:text-[#C0C0C0]"
@@ -47,10 +50,12 @@ export function PermitsTable({ permits }: Props) {
                   </Link>
                   <p className="mt-1 text-xs text-[#888888]">{permit.permit_number}</p>
                 </td>
+                <td className="px-4 py-4">
+                  <LeadTypeBadge leadType={permit.lead_type} />
+                </td>
                 <td className="px-4 py-4 text-white/80">
                   {permit.detail_description || "N/A"}
                 </td>
-                <td className="px-4 py-4 text-white/80">{formatDate(permit.permit_issued_date)}</td>
                 <td className="px-4 py-4 text-white/80">
                   {formatEstimatedValue(permit.estimated_value)}
                 </td>

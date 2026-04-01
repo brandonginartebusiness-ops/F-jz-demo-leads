@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { LeadTypeBadge } from "@/components/dashboard/lead-type-badge";
 import { PriorityBadge } from "@/components/dashboard/priority-badge";
 import { formatEstimatedValue } from "@/lib/permits/value";
 import { PermitRecord } from "@/lib/types";
@@ -23,6 +24,9 @@ export function PermitsCards({ permits }: Props) {
                 {permit.property_address || "Unknown address"}
               </h3>
               <p className="mt-1 text-sm text-[#888888]">{permit.permit_number}</p>
+              <div className="mt-3">
+                <LeadTypeBadge leadType={permit.lead_type} />
+              </div>
             </div>
             <div className="flex flex-col items-end gap-2">
               <PriorityBadge score={permit.priority_score} />
@@ -32,6 +36,14 @@ export function PermitsCards({ permits }: Props) {
             </div>
           </div>
           <dl className="mt-5 space-y-3 text-sm text-white/75">
+            <div className="flex justify-between gap-4">
+              <dt>Issued</dt>
+              <dd>{formatDate(permit.permit_issued_date)}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt>Description</dt>
+              <dd className="max-w-[14rem] text-right">{permit.detail_description || "N/A"}</dd>
+            </div>
             <div className="flex justify-between gap-4">
               <dt>Owner</dt>
               <dd className="text-right">{permit.owner_name || "Unknown"}</dd>
@@ -61,4 +73,10 @@ export function PermitsCards({ permits }: Props) {
       ))}
     </div>
   );
+}
+
+function formatDate(value: string | null) {
+  if (!value) return "N/A";
+
+  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(value));
 }

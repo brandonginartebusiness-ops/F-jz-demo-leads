@@ -5,12 +5,14 @@ type PriorityInput = Pick<
   | "permit_issued_date"
   | "detail_description"
   | "estimated_value"
+  | "lead_type"
   | "residential_commercial"
   | "square_footage"
   | "structure_floors"
 >;
 
 export function calculatePriority(input: PriorityInput) {
+  const leadTypePoints = getLeadTypePoints(input.lead_type);
   const squareFootagePoints = getSquareFootagePoints(input.square_footage);
   const floorsPoints = getFloorsPoints(input.structure_floors);
   const valuePoints = getValuePoints(input.estimated_value);
@@ -18,6 +20,7 @@ export function calculatePriority(input: PriorityInput) {
   const descriptionPoints = getDescriptionPoints(input.detail_description);
   const recencyPoints = getRecencyPoints(input.permit_issued_date);
   const score =
+    leadTypePoints +
     squareFootagePoints +
     floorsPoints +
     valuePoints +
@@ -27,8 +30,9 @@ export function calculatePriority(input: PriorityInput) {
     0;
 
   return {
-    score: Math.min(score, 100),
+    score: Math.max(0, Math.min(score, 100)),
     breakdown: {
+      leadType: leadTypePoints,
       squareFootage: squareFootagePoints,
       floors: floorsPoints,
       value: valuePoints,
@@ -51,11 +55,31 @@ export function getPriorityLabel(score: number) {
   return "Low";
 }
 
+function getLeadTypePoints(leadType: PermitRecord["lead_type"]) {
+  if (leadType === "full_demolition") {
+    return 30;
+  }
+
+  if (leadType === "partial_demolition") {
+    return 15;
+  }
+
+  if (leadType === "demo_related") {
+    return 5;
+  }
+
+  if (leadType === "junk") {
+    return -50;
+  }
+
+  return 0;
+}
+
 function getSquareFootagePoints(squareFootage: number | null) {
   const value = squareFootage ?? 0;
 
   if (value > 10_000) {
-    return 30;
+    return 25;
   }
 
   if (value > 5_000) {
@@ -64,6 +88,10 @@ function getSquareFootagePoints(squareFootage: number | null) {
 
   if (value > 1_000) {
     return 10;
+  }
+
+  if (value > 0) {
+    return 5;
   }
 
   return 0;
@@ -86,10 +114,18 @@ function getValuePoints(estimatedValue: number | null) {
   const value = estimatedValue ?? 0;
 
   if (value > 100_000) {
-    return 10;
+    return 25;
+  }
+
+  if (value > 50_000) {
+    return 15;
   }
 
   if (value > 10_000) {
+    return 10;
+  }
+
+  if (value > 1_000) {
     return 5;
   }
 
@@ -99,17 +135,15 @@ function getValuePoints(estimatedValue: number | null) {
 function getDescriptionPoints(detailDescription: string | null) {
   const normalized = detailDescription?.trim().toUpperCase() ?? "";
 
-  let score = 0;
-
-  if (normalized.includes("TOTAL")) {
-    score += 15;
+  if (
+    normalized.includes("TOTAL") ||
+    normalized.includes("COMPLETE") ||
+    normalized.includes("FULL")
+  ) {
+    return 15;
   }
 
-  if (normalized.includes("COMPLETE")) {
-    score += 15;
-  }
-
-  return score;
+  return 0;
 }
 
 function getRecencyPoints(permitIssuedDate: string | null) {
@@ -119,6 +153,10 @@ function getRecencyPoints(permitIssuedDate: string | null) {
 
   const issued = new Date(permitIssuedDate);
   const diffInDays = Math.floor((Date.now() - issued.getTime()) / 86400000);
+
+  if (diffInDays <= 3) {
+    return 20;
+  }
 
   if (diffInDays <= 7) {
     return 15;

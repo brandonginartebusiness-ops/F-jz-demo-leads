@@ -46,12 +46,39 @@ type ArcGisResponse = {
   exceededTransferLimit?: boolean;
 };
 
-function buildQueryUrl(offset: number) {
+type FetchPermitsOptions = {
+  fullSync?: boolean;
+};
+
+const DEMOLITION_WHERE_CLAUSE = [
+  "(",
+  "ApplicationTypeDescription LIKE '%DEMOL%'",
+  "OR DetailDescriptionComments LIKE '%TOTAL DEMO%'",
+  "OR DetailDescriptionComments LIKE '%COMPLETE DEMO%'",
+  "OR DetailDescriptionComments LIKE '%FULL DEMO%'",
+  "OR DetailDescriptionComments LIKE '%DEMO OF%'",
+  "OR DetailDescriptionComments LIKE '%DEMOLITION%'",
+  "OR DetailDescriptionComments LIKE '%INTERIOR DEMO%'",
+  "OR DetailDescriptionComments LIKE '%PARTIAL DEMO%'",
+  ")",
+  "AND ResidentialCommercial='C'",
+].join(" ");
+
+function buildWhereClause(options: FetchPermitsOptions) {
+  if (options.fullSync) {
+    return DEMOLITION_WHERE_CLAUSE;
+  }
+
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const dateStr = thirtyDaysAgo.toISOString().split("T")[0];
+
+  return `${DEMOLITION_WHERE_CLAUSE} AND PermitIssuedDate >= '${dateStr}'`;
+}
+
+function buildQueryUrl(offset: number, options: FetchPermitsOptions) {
   const params = new URLSearchParams({
-    where: `ApplicationTypeDescription LIKE '%DEMOL%' AND ResidentialCommercial='C' AND PermitIssuedDate >= '${dateStr}'`,
+    where: buildWhereClause(options),
     outFields: OUT_FIELDS.join(","),
     orderByFields: "PermitIssuedDate DESC",
     f: "json",
@@ -63,13 +90,13 @@ function buildQueryUrl(offset: number) {
   return `${ARCGIS_ENDPOINT}?${params.toString()}`;
 }
 
-export async function fetchCommercialDemolitionPermits() {
+export async function fetchCommercialDemolitionPermits(options: FetchPermitsOptions = {}) {
   const features: ArcGisFeature[] = [];
   let offset = 0;
   let hasMore = true;
 
   while (hasMore) {
-    const response = await fetch(buildQueryUrl(offset), {
+    const response = await fetch(buildQueryUrl(offset, options), {
       next: { revalidate: 0 },
       headers: {
         Accept: "application/json",

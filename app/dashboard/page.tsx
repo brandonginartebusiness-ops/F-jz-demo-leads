@@ -28,11 +28,12 @@ export default async function DashboardPage({ searchParams }: Props) {
               Internal dashboard
             </p>
             <h1 className="mt-3 text-3xl font-semibold text-white">
-              Miami-Dade demolition permits
+              Miami-Dade demolition leads
             </h1>
             <p className="mt-3 max-w-2xl text-sm text-[#888888]">
-              Review synced commercial demolition permits, prioritize high-value jobs,
-              and move each lead through your outreach pipeline.
+              Review official demolition permits plus hidden demo-related commercial
+              jobs, prioritize the strongest opportunities, and move each lead through
+              your outreach pipeline.
             </p>
           </div>
           <div className="flex items-center gap-4">

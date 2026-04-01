@@ -49,6 +49,27 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
         />
         <select
           className={selectClassName}
+          defaultValue={searchParams.leadType ?? ""}
+          name="leadType"
+        >
+          <option className="text-black" value="">
+            All lead types
+          </option>
+          <option className="text-black" value="full_demolition">
+            Full Demo
+          </option>
+          <option className="text-black" value="partial_demolition">
+            Partial Demo
+          </option>
+          <option className="text-black" value="demo_related">
+            Demo Related
+          </option>
+          <option className="text-black" value="junk">
+            Junk
+          </option>
+        </select>
+        <select
+          className={selectClassName}
           defaultValue={searchParams.leadStatus ?? ""}
           name="leadStatus"
         >
@@ -127,6 +148,12 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
           <option className="text-black" value="value_asc">
             Lowest value
           </option>
+          <option className="text-black" value="sqft_desc">
+            Largest square footage
+          </option>
+          <option className="text-black" value="sqft_asc">
+            Smallest square footage
+          </option>
         </select>
         <input
           className={baseInputClassName}
@@ -142,8 +169,64 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
           placeholder="Max value"
           type="number"
         />
+        <input
+          className={baseInputClassName}
+          defaultValue={searchParams.minSqFt}
+          name="minSqFt"
+          placeholder="Min sq ft"
+          type="number"
+        />
+        <input
+          className={baseInputClassName}
+          defaultValue={searchParams.maxSqFt}
+          name="maxSqFt"
+          placeholder="Max sq ft"
+          type="number"
+        />
+        <select
+          className={selectClassName}
+          defaultValue={searchParams.showJunk ?? "false"}
+          name="showJunk"
+        >
+          <option className="text-black" value="false">
+            Hide junk
+          </option>
+          <option className="text-black" value="true">
+            Show junk
+          </option>
+        </select>
         <input name="view" type="hidden" value={searchParams.view ?? "table"} />
-        <div className="flex gap-3 lg:col-span-6">
+        <div className="flex flex-wrap gap-3 lg:col-span-6">
+          <LeadTypeLink
+            currentParams={currentParams}
+            label="Full Demo"
+            pathname={pathname}
+            searchParams={searchParams}
+            value="full_demolition"
+          />
+          <LeadTypeLink
+            currentParams={currentParams}
+            label="Partial Demo"
+            pathname={pathname}
+            searchParams={searchParams}
+            value="partial_demolition"
+          />
+          <LeadTypeLink
+            currentParams={currentParams}
+            label="Demo Related"
+            pathname={pathname}
+            searchParams={searchParams}
+            value="demo_related"
+          />
+          <LeadTypeLink
+            currentParams={currentParams}
+            label="Show All"
+            pathname={pathname}
+            searchParams={searchParams}
+            value=""
+          />
+        </div>
+        <div className="flex flex-wrap gap-3 lg:col-span-6">
           <button
             className="rounded-lg bg-[#FF6B00] px-4 py-2 text-sm font-medium text-[#0a0a0a] transition hover:bg-[#FF8C00]"
             type="submit"
@@ -174,6 +257,47 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
         </div>
       </form>
     </div>
+  );
+}
+
+type LeadTypeLinkProps = {
+  pathname: string;
+  currentParams: Record<string, string>;
+  searchParams: DashboardSearchParams;
+  value: string;
+  label: string;
+};
+
+function LeadTypeLink({
+  pathname,
+  currentParams,
+  searchParams,
+  value,
+  label,
+}: LeadTypeLinkProps) {
+  const nextParams = new URLSearchParams(currentParams);
+
+  if (value) {
+    nextParams.set("leadType", value);
+    nextParams.set("showJunk", "false");
+  } else {
+    nextParams.delete("leadType");
+    nextParams.set("showJunk", "true");
+  }
+
+  const isActive = (searchParams.leadType ?? "") === value;
+
+  return (
+    <Link
+      className={`rounded-full px-4 py-2 text-sm transition ${
+        isActive
+          ? "bg-[#FF6B00] text-[#0a0a0a]"
+          : "border border-[#FF6B00]/25 text-[#C0C0C0] hover:border-[#FF6B00]"
+      }`}
+      href={nextParams.toString() ? `${pathname}?${nextParams.toString()}` : pathname}
+    >
+      {label}
+    </Link>
   );
 }
 

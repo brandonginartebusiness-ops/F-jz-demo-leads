@@ -1,4 +1,5 @@
 import { parseEstimatedValue, parseInteger } from "@/lib/permits/value";
+import { classifyLeadType } from "@/lib/permits/lead-type";
 
 type ArcGisAttributes = {
   PermitIssuedDate?: string | null;
@@ -64,6 +65,8 @@ export function normalizePermit(feature: ArcGisFeature) {
     return null;
   }
 
+  const detailDescription = attributes.DetailDescriptionComments?.trim() || null;
+
   return {
     permit_number: permitNumber,
     process_number: attributes.ProcessNumber?.trim() || null,
@@ -74,8 +77,12 @@ export function normalizePermit(feature: ArcGisFeature) {
     application_type_description: attributes.ApplicationTypeDescription?.trim() || null,
     proposed_use_code: parseInteger(attributes.ProposedUseCode),
     proposed_use_description: attributes.ProposedUseDescription?.trim() || null,
-    detail_description: attributes.DetailDescriptionComments?.trim() || null,
+    detail_description: detailDescription,
     residential_commercial: attributes.ResidentialCommercial?.trim() || null,
+    lead_type: classifyLeadType(
+      attributes.ApplicationTypeDescription,
+      detailDescription,
+    ),
     permit_issued_date: parseIssuedDate(attributes.PermitIssuedDate),
     application_date: parseTimestamp(attributes.ApplicationDate),
     last_inspection_date: attributes.LastInspectionDate?.trim() || null,

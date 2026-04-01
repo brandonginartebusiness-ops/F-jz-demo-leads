@@ -3,11 +3,15 @@ import { PermitRecord } from "@/lib/types";
 
 export type DashboardSearchParams = {
   leadStatus?: string;
+  leadType?: string;
+  showJunk?: string;
   priorityLabel?: string;
   dateFrom?: string;
   dateTo?: string;
   minValue?: string;
   maxValue?: string;
+  minSqFt?: string;
+  maxSqFt?: string;
   search?: string;
   sort?: string;
   view?: string;
@@ -21,6 +25,12 @@ export async function listPermits(searchParams: DashboardSearchParams) {
 
   if (searchParams.leadStatus) {
     query = query.eq("lead_status", searchParams.leadStatus);
+  }
+
+  if (searchParams.leadType) {
+    query = query.eq("lead_type", searchParams.leadType);
+  } else if (searchParams.showJunk !== "true") {
+    query = query.neq("lead_type", "junk");
   }
 
   if (normalizedPriorityLabel) {
@@ -53,6 +63,14 @@ export async function listPermits(searchParams: DashboardSearchParams) {
     query = query.lte("estimated_value", Number(searchParams.maxValue));
   }
 
+  if (searchParams.minSqFt) {
+    query = query.gte("square_footage", Number(searchParams.minSqFt));
+  }
+
+  if (searchParams.maxSqFt) {
+    query = query.lte("square_footage", Number(searchParams.maxSqFt));
+  }
+
   if (normalizedSearch) {
     query = query.or(
       [
@@ -80,6 +98,18 @@ export async function listPermits(searchParams: DashboardSearchParams) {
     case "value_asc":
       query = query
         .order("estimated_value", { ascending: true, nullsFirst: false })
+        .order("priority_score", { ascending: false, nullsFirst: false })
+        .order("permit_issued_date", { ascending: false, nullsFirst: false });
+      break;
+    case "sqft_desc":
+      query = query
+        .order("square_footage", { ascending: false, nullsFirst: false })
+        .order("priority_score", { ascending: false, nullsFirst: false })
+        .order("permit_issued_date", { ascending: false, nullsFirst: false });
+      break;
+    case "sqft_asc":
+      query = query
+        .order("square_footage", { ascending: true, nullsFirst: false })
         .order("priority_score", { ascending: false, nullsFirst: false })
         .order("permit_issued_date", { ascending: false, nullsFirst: false });
       break;

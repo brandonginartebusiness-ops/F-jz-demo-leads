@@ -22,7 +22,9 @@ export async function GET(request: NextRequest) {
 
   try {
     const admin = createAdminClient();
-    const features = await fetchCommercialDemolitionPermits();
+    const { searchParams } = new URL(request.url);
+    const fullSync = searchParams.get("mode") === "full";
+    const features = await fetchCommercialDemolitionPermits({ fullSync });
 
     let skipped = 0;
     const dedupedPermits = new Map<string, ReturnType<typeof normalizePermit>>();
@@ -99,6 +101,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      mode: fullSync ? "full" : "recent",
       fetched: features.length,
       upserted: permits.length,
       skipped,

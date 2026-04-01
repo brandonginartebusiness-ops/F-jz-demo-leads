@@ -1,3 +1,5 @@
+import { LeadType } from "@/lib/permits/lead-type";
+
 export type LeadStatus =
   | "new"
   | "bookmarked"
@@ -20,6 +22,7 @@ export type PermitRecord = {
   proposed_use_description: string | null;
   detail_description: string | null;
   residential_commercial: string | null;
+  lead_type: LeadType;
   permit_issued_date: string | null;
   application_date: string | null;
   last_inspection_date: string | null;

@@ -24,11 +24,15 @@ export async function GET(request: NextRequest) {
 
   const permits = await listPermits({
     leadStatus: searchParams.get("leadStatus") ?? undefined,
+    leadType: searchParams.get("leadType") ?? undefined,
+    showJunk: searchParams.get("showJunk") ?? undefined,
     priorityLabel: searchParams.get("priorityLabel") ?? undefined,
     dateFrom: searchParams.get("dateFrom") ?? undefined,
     dateTo: searchParams.get("dateTo") ?? undefined,
     minValue: searchParams.get("minValue") ?? undefined,
     maxValue: searchParams.get("maxValue") ?? undefined,
+    minSqFt: searchParams.get("minSqFt") ?? undefined,
+    maxSqFt: searchParams.get("maxSqFt") ?? undefined,
     search: searchParams.get("search") ?? undefined,
     sort: searchParams.get("sort") ?? undefined,
     view: searchParams.get("view") ?? undefined,
@@ -37,6 +41,7 @@ export async function GET(request: NextRequest) {
   const rows = [
     [
       "permit_number",
+      "lead_type",
       "folio_number",
       "property_address",
       "detail_description",
@@ -54,6 +59,7 @@ export async function GET(request: NextRequest) {
     ...permits.map((permit) =>
       [
         escapeCsv(permit.permit_number),
+        escapeCsv(permit.lead_type),
         escapeCsv(permit.folio_number),
         escapeCsv(permit.property_address),
         escapeCsv(permit.detail_description),

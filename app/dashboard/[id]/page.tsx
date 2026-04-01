@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ActivityFeedList } from "@/components/dashboard/activity-feed-list";
+import { LeadTypeBadge } from "@/components/dashboard/lead-type-badge";
 import { PriorityBadge } from "@/components/dashboard/priority-badge";
 import { LeadDetailForm } from "@/components/dashboard/lead-detail-form";
 import { listPermitActivity } from "@/lib/activity-feed/queries";
@@ -80,6 +81,9 @@ export default async function PermitDetailPage({ params }: Props) {
                 <p className="mt-2 text-sm text-[#888888]">
                   Permit {permit.permit_number}
                 </p>
+                <div className="mt-4">
+                  <LeadTypeBadge leadType={permit.lead_type} />
+                </div>
               </div>
               <PriorityBadge score={permit.priority_score} />
             </div>
@@ -164,6 +168,12 @@ export default async function PermitDetailPage({ params }: Props) {
                   <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Application Type</dt>
                   <dd className="mt-2 text-base text-white">
                     {permit.application_type_description || "N/A"}
+                  </dd>
+                </div>
+                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
+                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Lead Type</dt>
+                  <dd className="mt-2">
+                    <LeadTypeBadge leadType={permit.lead_type} />
                   </dd>
                 </div>
                 <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
@@ -311,11 +321,23 @@ export default async function PermitDetailPage({ params }: Props) {
                   </p>
                 </div>
                 <div className="mb-5 rounded-2xl border border-[#FF6B00]/20 bg-[#202020] p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">
-                    Priority score
-                  </p>
-                  <div className="mt-2">
-                    <PriorityBadge score={permit.priority_score} />
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">
+                        Lead type
+                      </p>
+                      <div className="mt-2">
+                        <LeadTypeBadge leadType={permit.lead_type} />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">
+                        Priority score
+                      </p>
+                      <div className="mt-2">
+                        <PriorityBadge score={permit.priority_score} />
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <LeadDetailForm permit={permit} />
