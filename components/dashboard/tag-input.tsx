@@ -1,0 +1,97 @@
+"use client";
+
+import { useState } from "react";
+
+type TagInputProps = {
+  label: string;
+  values: string[];
+  onChange: (values: string[]) => void;
+  presets?: readonly string[];
+  placeholder?: string;
+};
+
+export function TagInput({
+  label,
+  values,
+  onChange,
+  presets = [],
+  placeholder,
+}: TagInputProps) {
+  const [draft, setDraft] = useState("");
+
+  function addValue(value: string) {
+    const nextValue = value.trim();
+
+    if (!nextValue) {
+      return;
+    }
+
+    if (values.some((item) => item.toLowerCase() === nextValue.toLowerCase())) {
+      setDraft("");
+      return;
+    }
+
+    onChange([...values, nextValue]);
+    setDraft("");
+  }
+
+  function removeValue(value: string) {
+    onChange(values.filter((item) => item !== value));
+  }
+
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-medium text-white">{label}</label>
+      <div className="rounded-2xl border border-white/10 bg-[#11111d] p-3">
+        <div className="flex flex-wrap gap-2">
+          {values.map((value) => (
+            <button
+              key={value}
+              className="rounded-full border border-[#c9a84c]/30 bg-[#c9a84c]/10 px-3 py-1 text-sm text-[#f2df9e] transition hover:border-[#c9a84c]"
+              onClick={() => removeValue(value)}
+              type="button"
+            >
+              {value} x
+            </button>
+          ))}
+        </div>
+
+        <input
+          className="mt-3 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-[#c9a84c]"
+          onChange={(event) => setDraft(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              addValue(draft);
+            }
+          }}
+          placeholder={placeholder}
+          value={draft}
+        />
+
+        {presets.length > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {presets.map((preset) => {
+              const isSelected = values.includes(preset);
+
+              return (
+                <button
+                  key={preset}
+                  className={`rounded-full border px-3 py-1 text-sm transition ${
+                    isSelected
+                      ? "border-[#c9a84c] bg-[#c9a84c] text-[#11111d]"
+                      : "border-white/10 bg-white/5 text-white hover:border-[#c9a84c]"
+                  }`}
+                  onClick={() => addValue(preset)}
+                  type="button"
+                >
+                  {preset}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
