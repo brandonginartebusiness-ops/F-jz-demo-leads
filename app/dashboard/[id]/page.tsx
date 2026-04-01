@@ -120,7 +120,6 @@ export default async function PermitDetailPage({ params }: Props) {
                 </div>
 
                 <ActivityFeedList
-                  compact
                   emptyState="No activity has been recorded for this lead yet."
                   entries={recentActivity}
                 />

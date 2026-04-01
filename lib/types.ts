@@ -16,6 +16,8 @@ export type PermitRecord = {
   created_at: string | null;
   lead_status: LeadStatus;
   notes: string | null;
+  priority_score: number | null;
+  priority_label: "Hot" | "Warm" | "Low" | null;
 };
 
 export type PermitUpdate = Pick<PermitRecord, "lead_status" | "notes">;

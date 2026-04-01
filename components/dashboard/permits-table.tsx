@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { PriorityBadge } from "@/components/dashboard/priority-badge";
 import { PermitRecord } from "@/lib/types";
 
 type Props = {
@@ -34,6 +35,7 @@ export function PermitsTable({ permits }: Props) {
               <th className="px-4 py-3">Contractor</th>
               <th className="px-4 py-3">Issued</th>
               <th className="px-4 py-3">Value</th>
+              <th className="px-4 py-3">Priority</th>
               <th className="px-4 py-3">Lead status</th>
               <th className="px-4 py-3">Permit status</th>
             </tr>
@@ -56,6 +58,12 @@ export function PermitsTable({ permits }: Props) {
                 <td className="px-4 py-4 text-white/80">{formatDate(permit.issued_date)}</td>
                 <td className="px-4 py-4 text-white/80">
                   {formatCurrency(permit.estimated_value)}
+                </td>
+                <td className="px-4 py-4">
+                  <PriorityBadge
+                    label={permit.priority_label}
+                    score={permit.priority_score}
+                  />
                 </td>
                 <td className="px-4 py-4">
                   <span className="rounded-full bg-[#FF6B00]/15 px-3 py-1 text-xs font-medium text-[#C0C0C0]">

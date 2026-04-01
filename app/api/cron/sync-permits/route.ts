@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerEnv } from "@/lib/env";
 import { fetchCommercialDemolitionPermits } from "@/lib/permits/arcgis";
 import { normalizePermit } from "@/lib/permits/normalize";
+import { updatePriorityScores } from "@/lib/scoring/update-priority-scores";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -88,12 +89,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    const scoringResult = await updatePriorityScores();
+
     return NextResponse.json({
       success: true,
       fetched: features.length,
       upserted: permits.length,
       skipped,
       newPermitsLogged: newFolios.length,
+      scoredPermits: scoringResult.updatedCount,
     });
   } catch (error) {
     const message =

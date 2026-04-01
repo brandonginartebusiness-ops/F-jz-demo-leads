@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { PriorityBadge } from "@/components/dashboard/priority-badge";
 import { PermitRecord } from "@/lib/types";
 
 type Props = {
@@ -32,9 +33,15 @@ export function PermitsCards({ permits }: Props) {
               </h3>
               <p className="mt-1 text-sm text-[#888888]">{permit.folio}</p>
             </div>
-            <span className="rounded-full bg-[#FF6B00]/15 px-3 py-1 text-xs font-medium text-[#C0C0C0]">
-              {permit.lead_status}
-            </span>
+            <div className="flex flex-col items-end gap-2">
+              <PriorityBadge
+                label={permit.priority_label}
+                score={permit.priority_score}
+              />
+              <span className="rounded-full bg-[#FF6B00]/15 px-3 py-1 text-xs font-medium text-[#C0C0C0]">
+                {permit.lead_status}
+              </span>
+            </div>
           </div>
           <dl className="mt-5 space-y-3 text-sm text-white/75">
             <div className="flex justify-between gap-4">

@@ -11,6 +11,7 @@ type AnalyticsPermitRow = {
   status: string | null;
   lead_status: string | null;
   residential_commercial: string | null;
+  priority_label: string | null;
 };
 
 export type AnalyticsData = {
@@ -62,7 +63,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   const { data, error } = await supabase
     .from("permits")
     .select(
-      "address, estimated_value, issued_date, contractor_name, status, lead_status, residential_commercial",
+      "address, estimated_value, issued_date, contractor_name, status, lead_status, residential_commercial, priority_label",
     );
 
   if (error) {
@@ -107,7 +108,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     const estimatedValue = permit.estimated_value ?? 0;
     const issuedDate = permit.issued_date ? new Date(permit.issued_date) : null;
     const leadStatus = normalizeLeadStatus(permit.lead_status);
-    const priority = classifyPriority(estimatedValue);
+    const priority = normalizePriorityLabel(permit.priority_label) ?? classifyPriority(estimatedValue);
     const contractorName = normalizeContractorName(permit.contractor_name);
     const area = extractAreaLabel(permit.address);
 
@@ -231,6 +232,14 @@ function classifyPriority(estimatedValue: number): PriorityKey {
   }
 
   return "Low";
+}
+
+function normalizePriorityLabel(value: string | null): PriorityKey | null {
+  if (value === "Hot" || value === "Warm" || value === "Low") {
+    return value;
+  }
+
+  return null;
 }
 
 function normalizeContractorName(value: string | null) {

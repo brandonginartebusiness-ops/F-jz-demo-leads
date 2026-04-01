@@ -3,6 +3,7 @@ import { PermitRecord } from "@/lib/types";
 
 export type DashboardSearchParams = {
   leadStatus?: string;
+  priorityLabel?: string;
   dateFrom?: string;
   dateTo?: string;
   minValue?: string;
@@ -14,12 +15,18 @@ export type DashboardSearchParams = {
 
 export async function listPermits(searchParams: DashboardSearchParams) {
   const supabase = createClient();
-  let query = supabase.from("permits").select("*").order("issued_date", {
-    ascending: false,
-  });
+  let query = supabase
+    .from("permits")
+    .select("*")
+    .order("priority_score", { ascending: false, nullsFirst: false })
+    .order("issued_date", { ascending: false, nullsFirst: false });
 
   if (searchParams.leadStatus) {
     query = query.eq("lead_status", searchParams.leadStatus);
+  }
+
+  if (searchParams.priorityLabel) {
+    query = query.eq("priority_label", searchParams.priorityLabel);
   }
 
   if (searchParams.dateFrom) {
@@ -43,6 +50,14 @@ export async function listPermits(searchParams: DashboardSearchParams) {
     query = query.or(
       `address.ilike.%${search}%,contractor_name.ilike.%${search}%`,
     );
+  }
+
+  if (!searchParams.sort || searchParams.sort === "priority_desc") {
+    query = query.order("priority_score", { ascending: false, nullsFirst: false });
+  }
+
+  if (searchParams.sort === "priority_asc") {
+    query = query.order("priority_score", { ascending: true, nullsFirst: false });
   }
 
   if (searchParams.sort === "value_desc") {

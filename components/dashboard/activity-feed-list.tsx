@@ -5,10 +5,9 @@ import { ActivityFeedRecord } from "@/lib/types";
 type Props = {
   entries: ActivityFeedRecord[];
   emptyState: string;
-  compact?: boolean;
 };
 
-export function ActivityFeedList({ entries, emptyState, compact = false }: Props) {
+export function ActivityFeedList({ entries, emptyState }: Props) {
   if (entries.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-[#FF6B00]/25 bg-[#1a1a1a] p-6 text-sm text-[#888888]">

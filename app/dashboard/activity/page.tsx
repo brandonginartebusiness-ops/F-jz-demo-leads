@@ -99,7 +99,6 @@ export default async function ActivityPage({ searchParams }: Props) {
         </div>
 
         <ActivityFeedList
-          compact={false}
           emptyState="No activity matches the current filter yet."
           entries={entries}
         />
