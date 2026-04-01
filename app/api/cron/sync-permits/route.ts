@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerEnv } from "@/lib/env";
 import { fetchCommercialDemolitionPermits } from "@/lib/permits/arcgis";
 import { normalizePermit } from "@/lib/permits/normalize";
-import { updatePriorityScores } from "@/lib/scoring/update-priority-scores";
+import { calculatePriority } from "@/lib/scoring/calculate-priority";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -24,18 +24,27 @@ export async function GET(request: NextRequest) {
     const admin = createAdminClient();
     const { searchParams } = new URL(request.url);
     const fullSync = searchParams.get("mode") === "full";
+    const startedAt = Date.now();
     const features = await fetchCommercialDemolitionPermits({ fullSync });
+    const fetchCompletedAt = Date.now();
 
     let skipped = 0;
     const dedupedPermits = new Map<string, ReturnType<typeof normalizePermit>>();
 
-    for (const permit of features.map(normalizePermit)) {
+    for (const feature of features) {
+      const permit = normalizePermit(feature);
+
       if (!permit?.permit_number) {
         skipped += 1;
         continue;
       }
 
-      dedupedPermits.set(permit.permit_number, permit);
+      const scoredPermit = {
+        ...permit,
+        priority_score: calculatePriority(permit).score,
+      };
+
+      dedupedPermits.set(scoredPermit.permit_number, scoredPermit);
     }
 
     const permits = Array.from(dedupedPermits.values());
@@ -97,8 +106,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const scoringResult = await updatePriorityScores();
-
     return NextResponse.json({
       success: true,
       mode: fullSync ? "full" : "recent",
@@ -106,7 +113,11 @@ export async function GET(request: NextRequest) {
       upserted: permits.length,
       skipped,
       newPermitsLogged: newPermitNumbers.length,
-      scoredPermits: scoringResult.updatedCount,
+      scoredPermits: permits.length,
+      timings: {
+        fetchMs: fetchCompletedAt - startedAt,
+        totalMs: Date.now() - startedAt,
+      },
     });
   } catch (error) {
     const message =
