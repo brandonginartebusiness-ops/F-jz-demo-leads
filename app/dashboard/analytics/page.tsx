@@ -132,7 +132,7 @@ export default async function AnalyticsPage() {
           <div className="mb-4">
             <h2 className="text-xl font-semibold text-white">Permit Status Breakdown</h2>
             <p className="mt-1 text-sm text-[#888888]">
-              Current `bp_status` counts across the tracked permit set.
+              Current permit status counts across the tracked permit set.
             </p>
           </div>
           <div className="grid gap-3">

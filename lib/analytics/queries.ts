@@ -8,7 +8,7 @@ type AnalyticsPermitRow = {
   estimated_value: number | null;
   issued_date: string | null;
   contractor_name: string | null;
-  bp_status: string | null;
+  status: string | null;
   lead_status: string | null;
   residential_commercial: string | null;
 };
@@ -61,7 +61,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   const { data, error } = await supabase
     .from("permits")
     .select(
-      "address, estimated_value, issued_date, contractor_name, bp_status, lead_status, residential_commercial",
+      "address, estimated_value, issued_date, contractor_name, status, lead_status, residential_commercial",
     );
 
   if (error) {
@@ -97,7 +97,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     const estimatedValue = permit.estimated_value ?? 0;
     const issuedDate = permit.issued_date ? new Date(permit.issued_date) : null;
     const leadStatus = normalizeLeadStatus(permit.lead_status);
-    const permitStatus = normalizePermitStatus(permit.bp_status);
+    const permitStatus = normalizePermitStatus(permit.status);
     const contractorName = normalizeContractorName(permit.contractor_name);
     const area = extractAreaLabel(permit.address);
 
