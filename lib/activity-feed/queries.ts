@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { isMissingSchemaError } from "@/lib/supabase/errors";
 import { ActivityActionType, ActivityFeedRecord } from "@/lib/types";
 
 type ActivityFeedRow = {
@@ -35,6 +36,10 @@ export async function listActivityFeed(actionType?: ActivityActionType) {
   const { data, error } = await query;
 
   if (error) {
+    if (isMissingSchemaError(error)) {
+      return [];
+    }
+
     throw error;
   }
 
@@ -53,6 +58,10 @@ export async function listPermitActivity(permitId: string, limit = 5) {
     .limit(limit);
 
   if (error) {
+    if (isMissingSchemaError(error)) {
+      return [];
+    }
+
     throw error;
   }
 
@@ -70,6 +79,10 @@ export async function countActivityThisWeek() {
     .gte("created_at", sevenDaysAgo.toISOString());
 
   if (error) {
+    if (isMissingSchemaError(error)) {
+      return 0;
+    }
+
     throw error;
   }
 

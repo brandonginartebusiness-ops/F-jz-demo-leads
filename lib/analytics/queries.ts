@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { isMissingSchemaError } from "@/lib/supabase/errors";
 
 type LeadStatusKey = "new" | "bookmarked" | "contacted" | "closed";
 type PriorityKey = "Hot" | "Warm" | "Low";
@@ -60,17 +61,37 @@ const PRIORITY_ORDER: PriorityKey[] = [
 
 export async function getAnalyticsData(): Promise<AnalyticsData> {
   const supabase = createClient();
-  const { data, error } = await supabase
+  let data: AnalyticsPermitRow[] | null = null;
+
+  const primaryQuery = await supabase
     .from("permits")
     .select(
       "address, estimated_value, issued_date, contractor_name, status, lead_status, residential_commercial, priority_label",
     );
 
-  if (error) {
-    throw error;
-  }
+  if (primaryQuery.error) {
+    if (isMissingSchemaError(primaryQuery.error)) {
+      const fallbackQuery = await supabase
+        .from("permits")
+        .select(
+          "address, estimated_value, issued_date, contractor_name, status, lead_status, residential_commercial",
+        );
 
-  const permits = (data ?? []) as AnalyticsPermitRow[];
+      if (fallbackQuery.error) {
+        throw fallbackQuery.error;
+      }
+
+      data = (fallbackQuery.data ?? []).map((permit) => ({
+        ...permit,
+        priority_label: null,
+      })) as AnalyticsPermitRow[];
+    } else {
+      throw primaryQuery.error;
+    }
+  } else {
+    data = (primaryQuery.data ?? []) as AnalyticsPermitRow[];
+  }
+  const permits = data ?? [];
   const now = new Date();
   const sevenDaysAgo = new Date(now);
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -100,7 +121,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     .select("id", { count: "exact", head: true })
     .gte("created_at", sevenDaysAgo.toISOString());
 
-  if (activityError) {
+  if (activityError && !isMissingSchemaError(activityError)) {
     throw activityError;
   }
 
@@ -156,7 +177,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
       pipelineValue,
       newThisWeek,
       leadsContacted,
-      activityThisWeek: activityThisWeek ?? 0,
+      activityThisWeek: activityError ? 0 : (activityThisWeek ?? 0),
     },
     leadStatusBreakdown: LEAD_STATUS_ORDER.map((name) => ({
       name,

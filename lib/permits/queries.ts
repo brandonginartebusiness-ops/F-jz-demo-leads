@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { isMissingSchemaError } from "@/lib/supabase/errors";
 import { PermitRecord } from "@/lib/types";
 
 export type DashboardSearchParams = {
@@ -15,17 +16,57 @@ export type DashboardSearchParams = {
 
 export async function listPermits(searchParams: DashboardSearchParams) {
   const supabase = createClient();
-  let query = supabase
-    .from("permits")
-    .select("*")
-    .order("priority_score", { ascending: false, nullsFirst: false })
-    .order("issued_date", { ascending: false, nullsFirst: false });
+  try {
+    const { data, error } = await buildPermitsQuery(supabase, searchParams, true);
+
+    if (error) {
+      throw error;
+    }
+
+    return (data ?? []) as PermitRecord[];
+  } catch (error) {
+    if (
+      isMissingSchemaError(error) &&
+      (!searchParams.priorityLabel ||
+        searchParams.priorityLabel === "Hot" ||
+        searchParams.priorityLabel === "Warm" ||
+        searchParams.priorityLabel === "Low")
+    ) {
+      const { data, error: fallbackError } = await buildPermitsQuery(
+        supabase,
+        { ...searchParams, priorityLabel: undefined, sort: normalizeLegacySort(searchParams.sort) },
+        false,
+      );
+
+      if (fallbackError) {
+        throw fallbackError;
+      }
+
+      return (data ?? []) as PermitRecord[];
+    }
+
+    throw error;
+  }
+}
+
+function buildPermitsQuery(
+  supabase: ReturnType<typeof createClient>,
+  searchParams: DashboardSearchParams,
+  includePriority: boolean,
+) {
+  let query = supabase.from("permits").select("*");
+
+  if (includePriority) {
+    query = query.order("priority_score", { ascending: false, nullsFirst: false });
+  }
+
+  query = query.order("issued_date", { ascending: false, nullsFirst: false });
 
   if (searchParams.leadStatus) {
     query = query.eq("lead_status", searchParams.leadStatus);
   }
 
-  if (searchParams.priorityLabel) {
+  if (includePriority && searchParams.priorityLabel) {
     query = query.eq("priority_label", searchParams.priorityLabel);
   }
 
@@ -47,16 +88,14 @@ export async function listPermits(searchParams: DashboardSearchParams) {
 
   if (searchParams.search) {
     const search = searchParams.search.trim();
-    query = query.or(
-      `address.ilike.%${search}%,contractor_name.ilike.%${search}%`,
-    );
+    query = query.or(`address.ilike.%${search}%,contractor_name.ilike.%${search}%`);
   }
 
-  if (!searchParams.sort || searchParams.sort === "priority_desc") {
+  if (includePriority && (!searchParams.sort || searchParams.sort === "priority_desc")) {
     query = query.order("priority_score", { ascending: false, nullsFirst: false });
   }
 
-  if (searchParams.sort === "priority_asc") {
+  if (includePriority && searchParams.sort === "priority_asc") {
     query = query.order("priority_score", { ascending: true, nullsFirst: false });
   }
 
@@ -76,13 +115,15 @@ export async function listPermits(searchParams: DashboardSearchParams) {
     query = query.order("issued_date", { ascending: false, nullsFirst: false });
   }
 
-  const { data, error } = await query;
+  return query;
+}
 
-  if (error) {
-    throw error;
+function normalizeLegacySort(sort?: string) {
+  if (!sort || sort === "priority_desc" || sort === "priority_asc") {
+    return "date_desc";
   }
 
-  return (data ?? []) as PermitRecord[];
+  return sort;
 }
 
 export async function getPermitById(id: string) {
