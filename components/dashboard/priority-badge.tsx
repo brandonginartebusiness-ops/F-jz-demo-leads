@@ -1,10 +1,12 @@
+import { getPriorityLabel } from "@/lib/scoring/calculate-priority";
+
 type Props = {
-  label: "Hot" | "Warm" | "Low" | null;
-  score?: number | null;
+  score: number | null;
 };
 
-export function PriorityBadge({ label, score }: Props) {
-  const normalizedLabel = label ?? "Low";
+export function PriorityBadge({ score }: Props) {
+  const normalizedScore = score ?? 0;
+  const normalizedLabel = getPriorityLabel(normalizedScore);
   const styles =
     normalizedLabel === "Hot"
       ? "bg-[#FF6B00]/15 text-[#FF6B00]"
@@ -15,7 +17,7 @@ export function PriorityBadge({ label, score }: Props) {
   return (
     <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${styles}`}>
       <span>{normalizedLabel}</span>
-      {typeof score === "number" ? <span>{score}</span> : null}
+      <span>{normalizedScore}</span>
     </span>
   );
 }

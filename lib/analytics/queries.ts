@@ -1,18 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
 import { isMissingSchemaError } from "@/lib/supabase/errors";
+import { getPriorityLabel } from "@/lib/scoring/calculate-priority";
 
 type LeadStatusKey = "new" | "bookmarked" | "contacted" | "closed";
 type PriorityKey = "Hot" | "Warm" | "Low";
 
 type AnalyticsPermitRow = {
-  address: string | null;
+  property_address: string | null;
   estimated_value: number | null;
-  issued_date: string | null;
+  permit_issued_date: string | null;
   contractor_name: string | null;
-  status: string | null;
   lead_status: string | null;
   residential_commercial: string | null;
-  priority_label: string | null;
+  priority_score: number | null;
 };
 
 export type AnalyticsData = {
@@ -61,37 +61,22 @@ const PRIORITY_ORDER: PriorityKey[] = [
 
 export async function getAnalyticsData(): Promise<AnalyticsData> {
   const supabase = createClient();
-  let data: AnalyticsPermitRow[] | null = null;
-
-  const primaryQuery = await supabase
+  const { data, error } = await supabase
     .from("permits")
     .select(
-      "address, estimated_value, issued_date, contractor_name, status, lead_status, residential_commercial, priority_label",
+      "property_address, estimated_value, permit_issued_date, contractor_name, lead_status, residential_commercial, priority_score",
     );
 
-  if (primaryQuery.error) {
-    if (isMissingSchemaError(primaryQuery.error)) {
-      const fallbackQuery = await supabase
-        .from("permits")
-        .select(
-          "address, estimated_value, issued_date, contractor_name, status, lead_status, residential_commercial",
-        );
-
-      if (fallbackQuery.error) {
-        throw fallbackQuery.error;
-      }
-
-      data = (fallbackQuery.data ?? []).map((permit) => ({
-        ...permit,
-        priority_label: null,
-      })) as AnalyticsPermitRow[];
-    } else {
-      throw primaryQuery.error;
+  if (error) {
+    if (!isMissingSchemaError(error)) {
+      throw error;
     }
-  } else {
-    data = (primaryQuery.data ?? []) as AnalyticsPermitRow[];
   }
-  const permits = data ?? [];
+
+  const permits = ((data ?? []) as AnalyticsPermitRow[]).map((permit) => ({
+    ...permit,
+    priority_score: permit.priority_score ?? 0,
+  }));
   const now = new Date();
   const sevenDaysAgo = new Date(now);
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -127,11 +112,11 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
 
   for (const permit of permits) {
     const estimatedValue = permit.estimated_value ?? 0;
-    const issuedDate = permit.issued_date ? new Date(permit.issued_date) : null;
+    const issuedDate = permit.permit_issued_date ? new Date(permit.permit_issued_date) : null;
     const leadStatus = normalizeLeadStatus(permit.lead_status);
-    const priority = normalizePriorityLabel(permit.priority_label) ?? classifyPriority(estimatedValue);
+    const priority = getPriorityLabel(permit.priority_score ?? 0) as PriorityKey;
     const contractorName = normalizeContractorName(permit.contractor_name);
-    const area = extractAreaLabel(permit.address);
+    const area = extractAreaLabel(permit.property_address);
 
     if (estimatedValue > 1) {
       pipelineValue += estimatedValue;
@@ -238,29 +223,15 @@ function normalizeLeadStatus(value: string | null): LeadStatusKey | null {
     return null;
   }
 
+  if (normalized === "closed_won" || normalized === "closed_lost") {
+    return "closed";
+  }
+
   return LEAD_STATUS_ORDER.includes(normalized as LeadStatusKey)
     ? (normalized as LeadStatusKey)
-    : null;
-}
-
-function classifyPriority(estimatedValue: number): PriorityKey {
-  if (estimatedValue >= 100_000) {
-    return "Hot";
-  }
-
-  if (estimatedValue >= 25_000) {
-    return "Warm";
-  }
-
-  return "Low";
-}
-
-function normalizePriorityLabel(value: string | null): PriorityKey | null {
-  if (value === "Hot" || value === "Warm" || value === "Low") {
-    return value;
-  }
-
-  return null;
+    : normalized === "in_progress"
+      ? "contacted"
+      : null;
 }
 
 function normalizeContractorName(value: string | null) {

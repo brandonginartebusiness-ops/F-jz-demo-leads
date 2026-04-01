@@ -5,7 +5,14 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { ActivityActionType, LeadStatus } from "@/lib/types";
 
-const LEAD_STATUSES: LeadStatus[] = ["new", "bookmarked", "contacted", "closed"];
+const LEAD_STATUSES: LeadStatus[] = [
+  "new",
+  "bookmarked",
+  "contacted",
+  "in_progress",
+  "closed_won",
+  "closed_lost",
+];
 
 type PermitUpdateBody = {
   lead_status?: string;

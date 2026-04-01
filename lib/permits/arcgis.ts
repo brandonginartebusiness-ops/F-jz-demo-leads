@@ -1,23 +1,44 @@
 import { ArcGisFeature } from "@/lib/permits/normalize";
 
 const ARCGIS_ENDPOINT =
-  "https://services.arcgis.com/8Pc9XBTAsYuxx9Ny/ArcGIS/rest/services/BuildingPermit_gdb/FeatureServer/0/query";
-
-const WHERE_CLAUSE =
-  "TYPE='BLDG' AND DESC1 LIKE '%DEMOL%' AND RESCOMM='C'";
+  "https://services.arcgis.com/8Pc9XBTAsYuxx9Ny/ArcGIS/rest/services/miamidade_permit_data/FeatureServer/0/query";
 
 const OUT_FIELDS = [
-  "ADDRESS",
-  "STNDADDR",
-  "TYPE",
-  "DESC1",
-  "APPTYPE",
-  "ESTVALUE",
-  "ISSUDATE",
-  "CONTRNAME",
-  "BPSTATUS",
-  "RESCOMM",
-  "FOLIO",
+  "PermitIssuedDate",
+  "ApplicationDate",
+  "PermitNumber",
+  "ProcessNumber",
+  "MasterPermitNumber",
+  "PermitType",
+  "ResidentialCommercial",
+  "EstimatedValue",
+  "ApplicationTypeCode",
+  "ApplicationTypeDescription",
+  "ProposedUseCode",
+  "ProposedUseDescription",
+  "DetailDescriptionComments",
+  "FolioNumber",
+  "OwnerName",
+  "LegalDescription1",
+  "LegalDescription2",
+  "PropertyAddress",
+  "ArchitectName",
+  "ContractorNumber",
+  "ContractorName",
+  "ContractorAddress",
+  "ContractorCity",
+  "ContractorState",
+  "ContractorZip",
+  "ContractorPhone",
+  "SquareFootage",
+  "StructureUnits",
+  "StructureFloors",
+  "PermitTotalFee",
+  "LastInspectionDate",
+  "LastApprovedInspDate",
+  "CoCcDate",
+  "City",
+  "State",
 ];
 
 type ArcGisResponse = {
@@ -26,13 +47,17 @@ type ArcGisResponse = {
 };
 
 function buildQueryUrl(offset: number) {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const dateStr = thirtyDaysAgo.toISOString().split("T")[0];
   const params = new URLSearchParams({
-    where: WHERE_CLAUSE,
+    where: `ApplicationTypeDescription LIKE '%DEMOL%' AND ResidentialCommercial='C' AND PermitIssuedDate >= '${dateStr}'`,
     outFields: OUT_FIELDS.join(","),
+    orderByFields: "PermitIssuedDate DESC",
     f: "json",
     returnGeometry: "false",
     resultOffset: String(offset),
-    resultRecordCount: "200",
+    resultRecordCount: "2000",
   });
 
   return `${ARCGIS_ENDPOINT}?${params.toString()}`;
@@ -60,7 +85,7 @@ export async function fetchCommercialDemolitionPermits() {
 
     features.push(...batch);
 
-    hasMore = Boolean(payload.exceededTransferLimit) || batch.length === 200;
+    hasMore = Boolean(payload.exceededTransferLimit) || batch.length === 2000;
     offset += batch.length;
 
     if (batch.length === 0) {

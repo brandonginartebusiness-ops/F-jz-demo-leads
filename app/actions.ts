@@ -11,7 +11,9 @@ const LEAD_STATUSES: LeadStatus[] = [
   "new",
   "bookmarked",
   "contacted",
-  "closed",
+  "in_progress",
+  "closed_won",
+  "closed_lost",
 ];
 
 export async function signOut() {

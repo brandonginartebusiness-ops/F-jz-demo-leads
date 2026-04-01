@@ -28,33 +28,39 @@ export async function GET(request: NextRequest) {
     const dedupedPermits = new Map<string, ReturnType<typeof normalizePermit>>();
 
     for (const permit of features.map(normalizePermit)) {
-      if (!permit.folio) {
+      if (!permit?.permit_number) {
         skipped += 1;
         continue;
       }
 
-      // ArcGIS can emit multiple rows for the same FOLIO, so keep the latest
-      // observed record and send only one row per conflict key to Supabase.
-      dedupedPermits.set(permit.folio, permit);
+      dedupedPermits.set(permit.permit_number, permit);
     }
 
     const permits = Array.from(dedupedPermits.values());
-    const folios = permits.map((permit) => permit.folio).filter(Boolean) as string[];
-    const { data: existingPermits, error: existingPermitsError } = folios.length
-      ? await admin.from("permits").select("folio").in("folio", folios)
+    const permitNumbers = permits.map((permit) => permit?.permit_number).filter(Boolean) as string[];
+    const { data: existingPermits, error: existingPermitsError } = permitNumbers.length
+      ? await admin
+          .from("permits")
+          .select("permit_number")
+          .in("permit_number", permitNumbers)
       : { data: [], error: null };
 
     if (existingPermitsError) {
       throw existingPermitsError;
     }
 
-    const existingFolios = new Set((existingPermits ?? []).map((permit) => permit.folio));
-    const newFolios = permits
-      .filter((permit) => permit.folio && !existingFolios.has(permit.folio))
-      .map((permit) => permit.folio as string);
+    const existingPermitNumbers = new Set(
+      (existingPermits ?? []).map((permit) => permit.permit_number),
+    );
+    const newPermitNumbers = permits
+      .filter(
+        (permit) =>
+          permit?.permit_number && !existingPermitNumbers.has(permit.permit_number),
+      )
+      .map((permit) => permit?.permit_number as string);
 
     const { error } = await admin.from("permits").upsert(permits, {
-      onConflict: "folio",
+      onConflict: "permit_number",
       ignoreDuplicates: false,
     });
 
@@ -62,11 +68,11 @@ export async function GET(request: NextRequest) {
       throw error;
     }
 
-    if (newFolios.length > 0) {
+    if (newPermitNumbers.length > 0) {
       const { data: insertedPermits, error: insertedPermitsError } = await admin
         .from("permits")
-        .select("id, folio")
-        .in("folio", newFolios);
+        .select("id, permit_number")
+        .in("permit_number", newPermitNumbers);
 
       if (insertedPermitsError) {
         throw insertedPermitsError;
@@ -78,7 +84,7 @@ export async function GET(request: NextRequest) {
             permit_id: permit.id,
             action_type: "permit_synced",
             old_value: null,
-            new_value: permit.folio,
+            new_value: permit.permit_number,
             note: null,
           })),
         );
@@ -96,7 +102,7 @@ export async function GET(request: NextRequest) {
       fetched: features.length,
       upserted: permits.length,
       skipped,
-      newPermitsLogged: newFolios.length,
+      newPermitsLogged: newPermitNumbers.length,
       scoredPermits: scoringResult.updatedCount,
     });
   } catch (error) {

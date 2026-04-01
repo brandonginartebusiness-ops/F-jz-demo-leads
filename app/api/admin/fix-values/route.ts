@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     let updated = 0;
 
     for (const permit of permits) {
-      const rawEstimate = permit.raw_data?.ESTVALUE ?? permit.estimated_value;
+      const rawEstimate = permit.raw_data?.EstimatedValue ?? permit.estimated_value;
       const parsedValue = parseEstimatedValue(rawEstimate);
       const currentValue = parseEstimatedValue(permit.estimated_value);
 

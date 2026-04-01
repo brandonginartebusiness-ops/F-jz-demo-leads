@@ -1,135 +1,85 @@
 import { PermitRecord } from "@/lib/types";
 
-const BUSINESS_CONTRACTOR_KEYWORDS = ["INC", "CORP", "LLC", "GROUP", "CONSTRUCTION"];
-const PREMIUM_LOCATIONS = [
-  "BRICKELL",
-  "MIAMI BEACH",
-  "CORAL GABLES",
-  "DOWNTOWN",
-  "DORAL",
-  "AVENTURA",
-] as const;
-const QUADRANT_LOCATIONS = [" NW ", " NE ", " SW ", " SE "] as const;
-
-type PriorityLabel = "Hot" | "Warm" | "Low";
-
 type PriorityInput = Pick<
   PermitRecord,
-  "issued_date" | "contractor_name" | "status" | "address" | "estimated_value"
+  | "permit_issued_date"
+  | "detail_description"
+  | "estimated_value"
+  | "residential_commercial"
+  | "square_footage"
+  | "structure_floors"
 >;
 
 export function calculatePriority(input: PriorityInput) {
-  const recencyPoints = getRecencyPoints(input.issued_date);
-  const contractorPoints = getContractorPoints(input.contractor_name);
-  const permitStatusPoints = getPermitStatusPoints(input.status);
-  const locationPoints = getLocationPoints(input.address);
+  const squareFootagePoints = getSquareFootagePoints(input.square_footage);
+  const floorsPoints = getFloorsPoints(input.structure_floors);
   const valuePoints = getValuePoints(input.estimated_value);
+  const commercialPoints = input.residential_commercial === "C" ? 10 : 0;
+  const descriptionPoints = getDescriptionPoints(input.detail_description);
+  const recencyPoints = getRecencyPoints(input.permit_issued_date);
   const score =
+    squareFootagePoints +
+    floorsPoints +
+    valuePoints +
+    commercialPoints +
+    descriptionPoints +
     recencyPoints +
-    contractorPoints +
-    permitStatusPoints +
-    locationPoints +
-    valuePoints;
+    0;
 
   return {
-    score,
-    label: getPriorityLabel(score),
+    score: Math.min(score, 100),
     breakdown: {
-      recency: recencyPoints,
-      contractor: contractorPoints,
-      permitStatus: permitStatusPoints,
-      location: locationPoints,
+      squareFootage: squareFootagePoints,
+      floors: floorsPoints,
       value: valuePoints,
+      commercial: commercialPoints,
+      description: descriptionPoints,
+      recency: recencyPoints,
     },
   };
 }
 
-function getRecencyPoints(issuedDate: string | null) {
-  if (!issuedDate) {
-    return 0;
+export function getPriorityLabel(score: number) {
+  if (score >= 70) {
+    return "Hot";
   }
 
-  const issued = new Date(issuedDate);
-  const diffInDays = Math.floor((Date.now() - issued.getTime()) / (1000 * 60 * 60 * 24));
+  if (score >= 40) {
+    return "Warm";
+  }
 
-  if (diffInDays <= 7) {
+  return "Low";
+}
+
+function getSquareFootagePoints(squareFootage: number | null) {
+  const value = squareFootage ?? 0;
+
+  if (value > 10_000) {
     return 30;
   }
 
-  if (diffInDays <= 30) {
+  if (value > 5_000) {
     return 20;
   }
 
-  if (diffInDays <= 90) {
+  if (value > 1_000) {
     return 10;
   }
 
   return 0;
 }
 
-function getContractorPoints(contractorName: string | null) {
-  const normalized = contractorName?.trim().toUpperCase();
-
-  if (!normalized) {
-    return 10;
-  }
-
-  if (BUSINESS_CONTRACTOR_KEYWORDS.some((keyword) => normalized.includes(keyword))) {
-    return 25;
-  }
-
-  return 10;
-}
-
-function getPermitStatusPoints(status: string | null) {
-  const normalized = status?.trim().toUpperCase();
-
-  if (!normalized) {
-    return 10;
-  }
-
-  if (
-    normalized.includes("ACTIVE") ||
-    normalized.includes("ISSUED") ||
-    normalized.includes("OPEN") ||
-    normalized.includes("PENDING")
-  ) {
+function getFloorsPoints(structureFloors: number | null) {
+  const value = structureFloors ?? 0;
+  if (value >= 3) {
     return 20;
   }
 
-  if (
-    normalized.includes("FINAL") ||
-    normalized.includes("FINALIZED") ||
-    normalized.includes("COMPLETE") ||
-    normalized.includes("COMPLETED") ||
-    normalized.includes("CLOSED")
-  ) {
+  if (value >= 2) {
     return 10;
   }
 
-  if (normalized.includes("EXPIRED")) {
-    return 0;
-  }
-
-  return 10;
-}
-
-function getLocationPoints(address: string | null) {
-  const normalized = ` ${address?.trim().toUpperCase() ?? ""} `;
-
-  if (!normalized.trim()) {
-    return 5;
-  }
-
-  if (PREMIUM_LOCATIONS.some((location) => normalized.includes(location))) {
-    return 15;
-  }
-
-  if (QUADRANT_LOCATIONS.some((quadrant) => normalized.includes(quadrant))) {
-    return 8;
-  }
-
-  return 5;
+  return 0;
 }
 
 function getValuePoints(estimatedValue: number | null) {
@@ -146,14 +96,41 @@ function getValuePoints(estimatedValue: number | null) {
   return 0;
 }
 
-function getPriorityLabel(score: number): PriorityLabel {
-  if (score >= 70) {
-    return "Hot";
+function getDescriptionPoints(detailDescription: string | null) {
+  const normalized = detailDescription?.trim().toUpperCase() ?? "";
+
+  let score = 0;
+
+  if (normalized.includes("TOTAL")) {
+    score += 15;
   }
 
-  if (score >= 40) {
-    return "Warm";
+  if (normalized.includes("COMPLETE")) {
+    score += 15;
   }
 
-  return "Low";
+  return score;
+}
+
+function getRecencyPoints(permitIssuedDate: string | null) {
+  if (!permitIssuedDate) {
+    return 0;
+  }
+
+  const issued = new Date(permitIssuedDate);
+  const diffInDays = Math.floor((Date.now() - issued.getTime()) / 86400000);
+
+  if (diffInDays <= 7) {
+    return 15;
+  }
+
+  if (diffInDays <= 14) {
+    return 10;
+  }
+
+  if (diffInDays <= 30) {
+    return 5;
+  }
+
+  return 0;
 }

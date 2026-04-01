@@ -11,6 +11,19 @@ export function parseEstimatedValue(raw: unknown) {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
+export function parseInteger(raw: unknown) {
+  if (raw === null || raw === undefined || raw === "") {
+    return null;
+  }
+
+  if (typeof raw === "number") {
+    return Number.isFinite(raw) ? Math.trunc(raw) : null;
+  }
+
+  const parsed = Number.parseInt(String(raw), 10);
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
 export function formatEstimatedValue(value: number | null | undefined) {
   const normalized = typeof value === "number" ? value : 0;
 

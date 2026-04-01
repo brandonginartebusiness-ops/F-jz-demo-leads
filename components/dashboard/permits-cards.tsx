@@ -20,15 +20,12 @@ export function PermitsCards({ permits }: Props) {
           <div className="flex items-start justify-between gap-3">
             <div>
               <h3 className="text-lg font-semibold text-white">
-                {permit.address || "Unknown address"}
+                {permit.property_address || "Unknown address"}
               </h3>
-              <p className="mt-1 text-sm text-[#888888]">{permit.folio}</p>
+              <p className="mt-1 text-sm text-[#888888]">{permit.permit_number}</p>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <PriorityBadge
-                label={permit.priority_label}
-                score={permit.priority_score}
-              />
+              <PriorityBadge score={permit.priority_score} />
               <span className="rounded-full bg-[#FF6B00]/15 px-3 py-1 text-xs font-medium text-[#C0C0C0]">
                 {permit.lead_status}
               </span>
@@ -36,16 +33,28 @@ export function PermitsCards({ permits }: Props) {
           </div>
           <dl className="mt-5 space-y-3 text-sm text-white/75">
             <div className="flex justify-between gap-4">
+              <dt>Owner</dt>
+              <dd className="text-right">{permit.owner_name || "Unknown"}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
               <dt>Contractor</dt>
               <dd className="text-right">{permit.contractor_name || "Unknown"}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt>Permit status</dt>
-              <dd>{permit.status || "N/A"}</dd>
-            </div>
-            <div className="flex justify-between gap-4">
               <dt>Estimated value</dt>
               <dd>{formatEstimatedValue(permit.estimated_value)}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt>Square footage</dt>
+              <dd>{permit.square_footage?.toLocaleString() ?? "N/A"}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt>Floors</dt>
+              <dd>{permit.structure_floors ?? "N/A"}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt>Phone</dt>
+              <dd>{permit.contractor_phone || "N/A"}</dd>
             </div>
           </dl>
         </Link>

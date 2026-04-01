@@ -4,14 +4,22 @@ import { PermitRecord } from "@/lib/types";
 
 type ScoringPermitRow = Pick<
   PermitRecord,
-  "id" | "issued_date" | "contractor_name" | "status" | "address" | "estimated_value"
+  | "id"
+  | "permit_issued_date"
+  | "detail_description"
+  | "estimated_value"
+  | "residential_commercial"
+  | "square_footage"
+  | "structure_floors"
 >;
 
 export async function updatePriorityScores() {
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("permits")
-    .select("id, issued_date, contractor_name, status, address, estimated_value");
+    .select(
+      "id, permit_issued_date, detail_description, estimated_value, residential_commercial, square_footage, structure_floors",
+    );
 
   if (error) {
     throw error;
@@ -29,7 +37,6 @@ export async function updatePriorityScores() {
     return {
       id: permit.id,
       priority_score: priority.score,
-      priority_label: priority.label,
     };
   });
 

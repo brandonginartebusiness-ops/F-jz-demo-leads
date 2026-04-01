@@ -80,8 +80,14 @@ export function LeadDetailForm({ permit }: Props) {
           <option className="text-black" value="contacted">
             Contacted
           </option>
-          <option className="text-black" value="closed">
-            Closed
+          <option className="text-black" value="in_progress">
+            In progress
+          </option>
+          <option className="text-black" value="closed_won">
+            Closed won
+          </option>
+          <option className="text-black" value="closed_lost">
+            Closed lost
           </option>
         </select>
       </div>

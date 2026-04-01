@@ -20,7 +20,7 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
           className={`lg:col-span-2 ${baseInputClassName}`}
           defaultValue={searchParams.search}
           name="search"
-          placeholder="Search address or contractor"
+          placeholder="Search address, owner, contractor, or permit"
         />
         <select
           className={selectClassName}
@@ -39,26 +39,14 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
           <option className="text-black" value="contacted">
             Contacted
           </option>
-          <option className="text-black" value="closed">
-            Closed
+          <option className="text-black" value="in_progress">
+            In progress
           </option>
-        </select>
-        <select
-          className={selectClassName}
-          defaultValue={searchParams.priorityLabel ?? ""}
-          name="priorityLabel"
-        >
-          <option className="text-black" value="">
-            All priorities
+          <option className="text-black" value="closed_won">
+            Closed won
           </option>
-          <option className="text-black" value="Hot">
-            Hot
-          </option>
-          <option className="text-black" value="Warm">
-            Warm
-          </option>
-          <option className="text-black" value="Low">
-            Low
+          <option className="text-black" value="closed_lost">
+            Closed lost
           </option>
         </select>
         <input

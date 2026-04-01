@@ -12,10 +12,10 @@ type ActivityFeedRow = {
   created_at: string | null;
   permit:
     | {
-        address: string | null;
+        property_address: string | null;
       }
     | Array<{
-        address: string | null;
+        property_address: string | null;
       }>
     | null;
 };
@@ -25,7 +25,7 @@ export async function listActivityFeed(actionType?: ActivityActionType) {
   let query = supabase
     .from("activity_feed")
     .select(
-      "id, permit_id, action_type, old_value, new_value, note, created_at, permit:permits(address)",
+      "id, permit_id, action_type, old_value, new_value, note, created_at, permit:permits(property_address)",
     )
     .order("created_at", { ascending: false });
 
@@ -51,7 +51,7 @@ export async function listPermitActivity(permitId: string, limit = 5) {
   const { data, error } = await supabase
     .from("activity_feed")
     .select(
-      "id, permit_id, action_type, old_value, new_value, note, created_at, permit:permits(address)",
+      "id, permit_id, action_type, old_value, new_value, note, created_at, permit:permits(property_address)",
     )
     .eq("permit_id", permitId)
     .order("created_at", { ascending: false })
@@ -99,7 +99,7 @@ function mapActivityRows(rows: ActivityFeedRow[]): ActivityFeedRecord[] {
     note: row.note,
     created_at: row.created_at,
     permit_address: Array.isArray(row.permit)
-      ? (row.permit[0]?.address ?? null)
-      : (row.permit?.address ?? null),
+      ? (row.permit[0]?.property_address ?? null)
+      : (row.permit?.property_address ?? null),
   }));
 }
