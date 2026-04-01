@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { FormEvent } from "react";
 
 import { DashboardSearchParams } from "@/lib/permits/queries";
 
@@ -7,15 +11,36 @@ type FiltersProps = {
 };
 
 export function DashboardFilters({ searchParams }: FiltersProps) {
+  const pathname = usePathname();
+  const router = useRouter();
   const baseInputClassName =
     "rounded-lg border border-[#FF6B00]/25 bg-[#1a1a1a] px-3 py-2 text-sm text-white outline-none transition focus:border-[#FF6B00]";
   const selectClassName = `${baseInputClassName} text-black`;
 
   const nextView = searchParams.view === "cards" ? "table" : "cards";
+  const currentParams = buildSearchParams(searchParams);
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const params = new URLSearchParams();
+
+    formData.forEach((value, key) => {
+      const normalizedValue = String(value).trim();
+
+      if (normalizedValue) {
+        params.set(key, normalizedValue);
+      }
+    });
+
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname);
+  }
 
   return (
     <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-5">
-      <form className="grid gap-4 lg:grid-cols-6">
+      <form className="grid gap-4 lg:grid-cols-6" onSubmit={handleSubmit}>
         <input
           className={`lg:col-span-2 ${baseInputClassName}`}
           defaultValue={searchParams.search}
@@ -116,9 +141,7 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
           <Link
             className="rounded-lg border border-[#FF6B00]/25 px-4 py-2 text-sm text-[#C0C0C0] transition hover:border-[#FF6B00]"
             href={`/dashboard?${new URLSearchParams({
-              ...Object.fromEntries(
-                Object.entries(searchParams).filter(([, value]) => value),
-              ),
+              ...currentParams,
               view: nextView,
             }).toString()}`}
           >
@@ -126,16 +149,24 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
           </Link>
           <Link
             className="rounded-lg border border-[#FF6B00]/25 px-4 py-2 text-sm text-[#C0C0C0] transition hover:border-[#FF6B00]"
-            href={`/api/export?${new URLSearchParams(
-              Object.fromEntries(
-                Object.entries(searchParams).filter(([, value]) => value),
-              ),
-            ).toString()}`}
+            href={`/api/export?${new URLSearchParams(currentParams).toString()}`}
           >
             Export CSV
           </Link>
         </div>
       </form>
     </div>
+  );
+}
+
+function buildSearchParams(searchParams: DashboardSearchParams) {
+  return Object.fromEntries(
+    Object.entries(searchParams).filter(([, value]) => {
+      if (Array.isArray(value)) {
+        return value.length > 0 && value.some(Boolean);
+      }
+
+      return Boolean(value);
+    }),
   );
 }
