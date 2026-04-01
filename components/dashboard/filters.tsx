@@ -74,6 +74,24 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
             Closed lost
           </option>
         </select>
+        <select
+          className={selectClassName}
+          defaultValue={searchParams.priorityLabel ?? ""}
+          name="priorityLabel"
+        >
+          <option className="text-black" value="">
+            All priorities
+          </option>
+          <option className="text-black" value="Hot">
+            Hot
+          </option>
+          <option className="text-black" value="Warm">
+            Warm
+          </option>
+          <option className="text-black" value="Low">
+            Low
+          </option>
+        </select>
         <input
           className={baseInputClassName}
           defaultValue={searchParams.dateFrom}

@@ -3,6 +3,7 @@ import { PermitRecord } from "@/lib/types";
 
 export type DashboardSearchParams = {
   leadStatus?: string;
+  priorityLabel?: string;
   dateFrom?: string;
   dateTo?: string;
   minValue?: string;
@@ -14,14 +15,26 @@ export type DashboardSearchParams = {
 
 export async function listPermits(searchParams: DashboardSearchParams) {
   const supabase = createClient();
-  let query = supabase
-    .from("permits")
-    .select("*")
-    .order("priority_score", { ascending: false, nullsFirst: false })
-    .order("permit_issued_date", { ascending: false, nullsFirst: false });
+  let query = supabase.from("permits").select("*");
+  const normalizedSearch = searchParams.search?.trim();
+  const normalizedPriorityLabel = normalizePriorityLabel(searchParams.priorityLabel);
 
   if (searchParams.leadStatus) {
     query = query.eq("lead_status", searchParams.leadStatus);
+  }
+
+  if (normalizedPriorityLabel) {
+    if (normalizedPriorityLabel === "Hot") {
+      query = query.gte("priority_score", 70);
+    }
+
+    if (normalizedPriorityLabel === "Warm") {
+      query = query.gte("priority_score", 40).lt("priority_score", 70);
+    }
+
+    if (normalizedPriorityLabel === "Low") {
+      query = query.lt("priority_score", 40);
+    }
   }
 
   if (searchParams.dateFrom) {
@@ -40,41 +53,52 @@ export async function listPermits(searchParams: DashboardSearchParams) {
     query = query.lte("estimated_value", Number(searchParams.maxValue));
   }
 
-  if (searchParams.search) {
-    const search = searchParams.search.trim();
+  if (normalizedSearch) {
     query = query.or(
       [
-        `property_address.ilike.%${search}%`,
-        `contractor_name.ilike.%${search}%`,
-        `owner_name.ilike.%${search}%`,
-        `permit_number.ilike.%${search}%`,
-        `detail_description.ilike.%${search}%`,
+        `property_address.ilike.%${normalizedSearch}%`,
+        `contractor_name.ilike.%${normalizedSearch}%`,
+        `owner_name.ilike.%${normalizedSearch}%`,
+        `permit_number.ilike.%${normalizedSearch}%`,
+        `detail_description.ilike.%${normalizedSearch}%`,
       ].join(","),
     );
   }
 
-  if (!searchParams.sort || searchParams.sort === "priority_desc") {
-    query = query.order("priority_score", { ascending: false, nullsFirst: false });
-  }
-
-  if (searchParams.sort === "priority_asc") {
-    query = query.order("priority_score", { ascending: true, nullsFirst: false });
-  }
-
-  if (searchParams.sort === "value_desc") {
-    query = query.order("estimated_value", { ascending: false, nullsFirst: false });
-  }
-
-  if (searchParams.sort === "value_asc") {
-    query = query.order("estimated_value", { ascending: true, nullsFirst: false });
-  }
-
-  if (searchParams.sort === "date_asc") {
-    query = query.order("permit_issued_date", { ascending: true, nullsFirst: false });
-  }
-
-  if (searchParams.sort === "date_desc") {
-    query = query.order("permit_issued_date", { ascending: false, nullsFirst: false });
+  switch (searchParams.sort) {
+    case "priority_asc":
+      query = query
+        .order("priority_score", { ascending: true, nullsFirst: false })
+        .order("permit_issued_date", { ascending: false, nullsFirst: false });
+      break;
+    case "value_desc":
+      query = query
+        .order("estimated_value", { ascending: false, nullsFirst: false })
+        .order("priority_score", { ascending: false, nullsFirst: false })
+        .order("permit_issued_date", { ascending: false, nullsFirst: false });
+      break;
+    case "value_asc":
+      query = query
+        .order("estimated_value", { ascending: true, nullsFirst: false })
+        .order("priority_score", { ascending: false, nullsFirst: false })
+        .order("permit_issued_date", { ascending: false, nullsFirst: false });
+      break;
+    case "date_asc":
+      query = query
+        .order("permit_issued_date", { ascending: true, nullsFirst: false })
+        .order("priority_score", { ascending: false, nullsFirst: false });
+      break;
+    case "date_desc":
+      query = query
+        .order("permit_issued_date", { ascending: false, nullsFirst: false })
+        .order("priority_score", { ascending: false, nullsFirst: false });
+      break;
+    case "priority_desc":
+    default:
+      query = query
+        .order("priority_score", { ascending: false, nullsFirst: false })
+        .order("permit_issued_date", { ascending: false, nullsFirst: false });
+      break;
   }
 
   const { data, error } = await query;
@@ -84,6 +108,27 @@ export async function listPermits(searchParams: DashboardSearchParams) {
   }
 
   return (data ?? []) as PermitRecord[];
+}
+function normalizePriorityLabel(value?: string) {
+  if (!value) {
+    return undefined;
+  }
+
+  const normalized = value.trim().toLowerCase();
+
+  if (normalized === "hot") {
+    return "Hot";
+  }
+
+  if (normalized === "warm") {
+    return "Warm";
+  }
+
+  if (normalized === "low") {
+    return "Low";
+  }
+
+  return undefined;
 }
 
 export async function getPermitById(id: string) {

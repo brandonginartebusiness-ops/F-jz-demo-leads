@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
 
   const permits = await listPermits({
     leadStatus: searchParams.get("leadStatus") ?? undefined,
+    priorityLabel: searchParams.get("priorityLabel") ?? undefined,
     dateFrom: searchParams.get("dateFrom") ?? undefined,
     dateTo: searchParams.get("dateTo") ?? undefined,
     minValue: searchParams.get("minValue") ?? undefined,
