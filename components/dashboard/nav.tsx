@@ -1,7 +1,11 @@
 import Link from "next/link";
 
 type DashboardNavProps = {
-  currentPath: "/dashboard" | "/dashboard/setup" | "/dashboard/icp";
+  currentPath:
+    | "/dashboard"
+    | "/dashboard/setup"
+    | "/dashboard/icp"
+    | "/dashboard/analytics";
   showSetupWarning: boolean;
 };
 
@@ -9,6 +13,7 @@ const links = [
   { label: "Dashboard", href: "/dashboard" },
   { label: "Setup", href: "/dashboard/setup" },
   { label: "ICP Builder", href: "/dashboard/icp" },
+  { label: "Analytics", href: "/dashboard/analytics" },
 ] as const;
 
 export function DashboardNav({
