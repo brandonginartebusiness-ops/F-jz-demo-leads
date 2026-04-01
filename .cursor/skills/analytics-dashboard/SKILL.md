@@ -16,7 +16,7 @@ Default scope:
 1. Keep the entry page at `app/dashboard/analytics/page.tsx`.
 2. Use a single `GET /api/analytics` endpoint as the analytics payload source.
 3. Reuse `recharts` for charts.
-4. Only touch the existing nav to add or preserve the `Analytics` link.
+4. Add or preserve the `Analytics` link in the existing dashboard nav.
 
 ## Repo Anchors
 
@@ -55,7 +55,7 @@ Use these defaults unless the repository already has a stronger existing rule:
 - `Permits Over Time`: last 12 months, grouped by month label
 - `Most Active Areas`: group by the first alphabetic word in `address`; ignore leading street numbers
 
-If the repo does not already store explicit lead priority, derive it consistently in code and document the heuristic in the final response.
+If the repo does not already store explicit lead priority, derive it consistently in code.
 
 Recommended fallback heuristic:
 
@@ -66,7 +66,7 @@ Recommended fallback heuristic:
 ## UI Constraints
 
 - Keep the existing dark dashboard styling language.
-- Use `#FF6B00` as the primary analytics accent.
+- Use `#0a0a0a`, `#1a1a1a`, and `#FF6B00` as the primary palette.
 - Use `#888888` as the secondary neutral.
 - Prefer adding a new local client component for API-driven interactivity instead of overloading the page file.
 - Do not restyle unrelated dashboard pages.
@@ -115,11 +115,3 @@ After implementation, validate at least these:
 3. The dashboard renders all six requested sections
 4. The active-area grouping follows the first street-word rule
 5. Touched files are lint-clean
-
-## Output Style
-
-When finishing:
-
-- Summarize the analytics sections that were added or updated
-- Call out any assumptions, especially for derived priority logic
-- Mention whether `recharts` was already installed or had to be added

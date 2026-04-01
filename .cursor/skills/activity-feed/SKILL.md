@@ -17,7 +17,7 @@ Default scope:
 2. Render the full feed at `app/dashboard/activity/page.tsx`.
 3. Show recent permit-specific activity on `app/dashboard/[id]/page.tsx`.
 4. Log events when permit status or notes change and when new permits are synced.
-5. Add or preserve the `Activity` link in `components/dashboard/nav.tsx`.
+5. Add or preserve the `Activity` link in the dashboard nav.
 
 ## Repo Anchors
 
@@ -43,6 +43,7 @@ Implement these parts:
    - `permit_synced`
 5. A mini feed on the lead detail page that shows the latest 5 entries
 6. An analytics stat for weekly activity volume
+7. Any supporting route or form changes needed so activity is written at the source of truth
 
 ## Data Rules
 

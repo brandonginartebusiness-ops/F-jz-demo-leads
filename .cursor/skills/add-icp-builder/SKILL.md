@@ -1,6 +1,6 @@
 ---
 name: add-icp-builder
-description: Add an ICP (Ideal Customer Profile) builder to the JZ Demolition portal with a Supabase icp_profiles table, /api/leads/icp routes, and a /dashboard/icp page. Use when the user asks for ICP profiles, ideal customer profile management, target industries/titles/location filters, or the ICP builder in this app.
+description: Add or update the JZ Demolition ICP builder with `icp_profiles` storage, `/api/leads/icp` routes, and `/dashboard/icp` management UI. Use when the user asks for ideal customer profiles, targeting rules, industries, job titles, locations, or the ICP builder in this app.
 ---
 
 # Add ICP Builder
@@ -9,50 +9,69 @@ Use this skill when implementing or updating the ICP builder in this repository.
 
 ## Goal
 
-Add ICP profile creation and management without broadly rewriting the existing portal.
+Add ICP profile creation and management without broad dashboard refactors.
 
 Default scope:
 
-1. Add a new Supabase migration for `icp_profiles`.
-2. Add `/api/leads/icp` with `GET` and `POST`.
-3. Add `/api/leads/icp/[id]` with `DELETE`.
+1. Add a migration for `icp_profiles`.
+2. Add `GET` and `POST /api/leads/icp`.
+3. Add `DELETE /api/leads/icp/[id]`.
 4. Add `/dashboard/icp`.
-5. Only modify existing files when needed to add an `ICP Builder` nav/sidebar link.
-
-If the request would require broader edits to existing dashboard files, stop and ask before proceeding.
+5. Add or preserve the `ICP Builder` link in the dashboard nav.
 
 ## Repo Anchors
 
-Use these existing patterns unless the user asks otherwise:
+Follow these patterns unless the user says otherwise:
 
-- Supabase server client: `lib/supabase/server.ts`
-- Supabase browser client: `lib/supabase/client.ts`
-- Supabase admin client: `lib/supabase/admin.ts`
-- Existing API route style: `app/api/export/route.ts`, `app/api/cron/sync-permits/route.ts`
-- Existing dashboard styling: `app/dashboard/page.tsx`, `components/dashboard/filters.tsx`, `components/dashboard/lead-detail-form.tsx`
-- Theme tokens: `app/globals.css`
+- Dashboard shell: `app/dashboard/page.tsx`, `app/dashboard/setup/page.tsx`
+- Dashboard nav: `components/dashboard/nav.tsx`
+- Existing ICP files: `lib/icp/schema.ts`, `components/dashboard/icp-builder.tsx`
+- Supabase server and admin access: `lib/supabase/server.ts`, `lib/supabase/admin.ts`
+- API route style: `app/api/export/route.ts`, `app/api/leads/gather-context/route.ts`
+- Dashboard component styling: `components/dashboard/filters.tsx`, `components/dashboard/lead-detail-form.tsx`
 
-## Constraints
+## Required Output
 
-- Preserve the current dark UI language.
-- Match the existing accent color `#c9a84c`.
-- Reuse the same card, input, and button styling patterns already present in dashboard components.
+Implement these parts:
+
+1. A migration for `icp_profiles`
+2. Shared validation or schema helpers when useful
+3. `GET` and `POST /api/leads/icp`
+4. `DELETE /api/leads/icp/[id]`
+5. `/dashboard/icp` with creation and management UI
+6. Dashboard nav integration for `ICP Builder`
+
+## Data Rules
+
+Use these defaults unless the repository already has a stronger rule:
+
+- Return profiles ordered by `created_at desc`
+- Validate payloads with `zod`
+- Default `locations` to `["Miami, FL"]` when omitted
+- Ensure `company_size_min <= company_size_max` when both are present
+- Keep `Use in Pipeline` as a disabled placeholder unless the user explicitly asks for pipeline integration
+
+## UI Constraints
+
+- Match the existing dark dashboard styling language.
+- Use `#0a0a0a`, `#1a1a1a`, and `#FF6B00` as the primary palette.
+- Reuse existing card, input, and button patterns where possible.
+- Prefer local client components for interactivity while keeping the page server-rendered when practical.
 - Do not restyle unrelated screens.
-- Do not edit existing files except for the nav/sidebar link, unless the user later approves more.
-- If there is no actual shared nav/sidebar entry point yet, ask before introducing one just for this page.
 
 ## Implementation Workflow
 
-Copy this checklist and work through it:
+Use this checklist:
 
 ```text
 Task Progress:
-- [ ] Inspect the current dashboard/nav entry point
-- [ ] Add a new Supabase migration for icp_profiles
-- [ ] Add /api/leads/icp GET and POST
-- [ ] Add /api/leads/icp/[id] DELETE
-- [ ] Add /dashboard/icp page and any new local components
-- [ ] Add ICP Builder nav link only if a nav already exists
+- [ ] Inspect the dashboard shell, nav, and existing ICP helpers
+- [ ] Add the `icp_profiles` migration
+- [ ] Add or update validation and schema helpers
+- [ ] Create or update `/api/leads/icp` GET and POST
+- [ ] Create or update `/api/leads/icp/[id]` DELETE
+- [ ] Build `/dashboard/icp` and any local interactive components
+- [ ] Ensure the nav includes `ICP Builder`
 - [ ] Verify auth, lint, and happy-path behavior
 ```
 
@@ -80,7 +99,7 @@ Recommended follow-up in the same migration:
 
 - `alter table public.icp_profiles enable row level security;`
 - Add an authenticated read policy if route handlers use the regular server client.
-- Prefer admin-client writes from route handlers if that matches the existing data-write pattern.
+- Prefer admin-client writes from route handlers if that matches existing write behavior.
 
 ## API Routes
 
@@ -130,7 +149,7 @@ type IcpProfilePayload = {
 
 Create `app/dashboard/icp/page.tsx`. Prefer adding new components rather than editing current dashboard files.
 
-If the page needs client interactivity, place it in new client components such as:
+If the page needs client interactivity, place it in local client components such as:
 
 - `components/dashboard/icp-builder.tsx`
 - `components/dashboard/tag-input.tsx`
@@ -177,7 +196,7 @@ Each card should include:
 
 - `Use in Pipeline` button, disabled for now
 - `Delete` button
-- Delete confirmation modal before removal
+- Delete confirmation before removal
 
 ### Empty state
 
@@ -189,11 +208,9 @@ If there are no profiles yet, show a dashboard-styled empty state instead of bla
 - Keep the API route as the system of record even if the initial page load reads from Supabase directly.
 - On save, post to `/api/leads/icp`, then refresh the list in place.
 - On delete, call `/api/leads/icp/[id]`, then remove the deleted card from the UI.
-- The disabled `Use in Pipeline` action is only a placeholder. Do not implement pipeline behavior yet.
+- The disabled `Use in Pipeline` action is only a placeholder.
 
 ## Tag Input Guidance
-
-There is no existing shared tag-input component in this repo.
 
 Preferred approach:
 
@@ -206,34 +223,18 @@ Do not add a new dependency just for tags.
 
 ## Modal Guidance
 
-Search the repo for an existing dialog/modal pattern before building one.
+Search the repo for an existing dialog or modal pattern before building one.
 
 If none exists:
 
 - Use a lightweight in-page confirmation modal or confirmation panel with the existing dark theme.
-- Do not add a dialog dependency unless the user approves it.
+- Do not add a dialog dependency by default.
 
 ## Navigation Link
 
-Locate the actual dashboard nav or sidebar entry point before editing.
+Use the existing dashboard nav entry point:
 
-Allowed existing-file change:
-
-- Add an `ICP Builder` link to `/dashboard/icp`
-
-Do not use this as permission to refactor the surrounding dashboard layout.
-
-If the current repo does not yet have a reusable nav/sidebar component, ask before introducing a wider dashboard shell just to host the link.
-
-## Auth And Data Access
-
-Follow current portal auth behavior:
-
-- Server-rendered pages may read with `createClient()` from `lib/supabase/server.ts`
-- Browser interactions may use `lib/supabase/client.ts` if needed
-- Admin-only writes should use `createAdminClient()` from route handlers when RLS would otherwise block the operation
-
-Do not invent a second auth system.
+- Add or preserve an `ICP Builder` link to `/dashboard/icp`
 
 ## Verification
 
@@ -247,11 +248,3 @@ After implementation, validate at least these:
 6. Saved profiles render as cards with the disabled placeholder action
 7. Delete requires confirmation before removal
 8. Lints pass for touched files
-
-## Output Style
-
-When completing the task:
-
-- Briefly summarize what was added
-- Mention any assumptions, especially around nav placement or modal behavior
-- Call out if a dependency would be needed for a more advanced modal or tag input

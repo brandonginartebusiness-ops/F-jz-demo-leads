@@ -9,48 +9,65 @@ Use this skill when implementing or updating the JZ Demolition company setup flo
 
 ## Goal
 
-Add a company setup experience without broadly rewriting the existing portal.
+Add a focused company setup experience without broad dashboard refactors.
 
 Default scope:
 
 1. Add a Supabase migration for `company_context`.
 2. Add `/api/leads/gather-context` with `GET` and `POST`.
 3. Add `/dashboard/setup`.
-4. Only modify existing files when needed to add the `Setup` nav/sidebar link or its warning indicator.
-
-If the request would require broader edits to existing dashboard files, stop and ask before proceeding.
+4. Add or preserve the `Setup` link and missing-setup warning state in the dashboard nav.
 
 ## Repo Anchors
 
-Use these existing patterns unless the user asks otherwise:
+Follow these patterns unless the user says otherwise:
 
-- Supabase server client: `lib/supabase/server.ts`
-- Supabase browser client: `lib/supabase/client.ts`
-- Supabase admin client: `lib/supabase/admin.ts`
-- Existing API route style: `app/api/export/route.ts`, `app/api/cron/sync-permits/route.ts`
-- Existing dashboard styling: `app/dashboard/page.tsx`, `components/dashboard/filters.tsx`, `components/dashboard/lead-detail-form.tsx`
-- Theme tokens: `app/globals.css`
+- Dashboard shell: `app/dashboard/page.tsx`, `app/dashboard/analytics/page.tsx`
+- Dashboard nav: `components/dashboard/nav.tsx`
+- Existing setup data helpers: `lib/company-context/queries.ts`, `lib/company-context/schema.ts`
+- Supabase server and admin access: `lib/supabase/server.ts`, `lib/supabase/admin.ts`
+- API route style: `app/api/export/route.ts`, `app/api/leads/icp/route.ts`
+- Existing dashboard form styling: `components/dashboard/lead-detail-form.tsx`, `components/dashboard/filters.tsx`
 
-## Constraints
+## Required Output
 
-- Preserve the current dark UI language.
-- Match the existing accent color `#c9a84c`.
-- Keep page backgrounds aligned with the current dashboard look. If the request explicitly says `#0f0f1a`, use that on the new setup page while still fitting the existing theme tokens.
+Implement these parts:
+
+1. A migration for `company_context`
+2. Shared validation and query helpers when useful
+3. `GET` and `POST /api/leads/gather-context`
+4. `/dashboard/setup` plus any local setup form components
+5. Setup-warning nav integration when context is missing
+
+## Data Rules
+
+Use these defaults unless the repository already has a stronger rule:
+
+- Store a single logical company context row
+- `GET` should return the newest row or `null`
+- `POST` may replace the prior row to preserve single-record behavior
+- Validate payloads with `zod`
+- Keep `service_areas` as a text field unless the user explicitly asks for arrays
+
+## UI Constraints
+
+- Match the existing dark dashboard styling language.
+- Use `#0a0a0a`, `#1a1a1a`, and `#FF6B00` as the primary palette.
+- Keep the page server-rendered when practical and move form interactivity into local client components.
 - Do not restyle unrelated screens.
-- Do not edit existing files except for the nav/sidebar link and warning dot, unless the user later approves more.
 
 ## Implementation Workflow
 
-Copy this checklist and work through it:
+Use this checklist:
 
 ```text
 Task Progress:
-- [ ] Inspect the current dashboard/nav entry point
-- [ ] Add a new Supabase migration for company_context
-- [ ] Add typed helpers for reading/writing company_context if useful
-- [ ] Add /api/leads/gather-context route
-- [ ] Add /dashboard/setup page and any new local components
-- [ ] Add Setup nav link with warning dot
+- [ ] Inspect the dashboard shell, nav, and existing company-context helpers
+- [ ] Add the `company_context` migration
+- [ ] Add or update validation and query helpers
+- [ ] Create or update `app/api/leads/gather-context/route.ts`
+- [ ] Build `app/dashboard/setup/page.tsx` and local setup form components
+- [ ] Ensure the nav includes `Setup` plus a missing-context warning indicator
 - [ ] Verify auth, lint, and happy-path behavior
 ```
 
@@ -78,15 +95,8 @@ create table if not exists public.company_context (
 Recommended follow-up in the same migration:
 
 - `alter table public.company_context enable row level security;`
-- Add an authenticated read policy if the rest of the portal follows that pattern.
-- Add authenticated write policy if route handlers use the regular server client.
-- If writes should bypass RLS, keep the public read policy narrow and use `createAdminClient()` in the API route instead.
-
-Because this flow always stores one logical row:
-
-- `GET` should return the newest or only row.
-- `POST` may delete all rows then insert one replacement row, or perform an equivalent single-row reset.
-- Keep the response shape simple and stable.
+- Add an authenticated read policy when the rest of the portal follows that pattern.
+- Prefer admin-client writes from route handlers if that matches existing write behavior.
 
 ## API Route
 
@@ -95,8 +105,8 @@ Create `app/api/leads/gather-context/route.ts`.
 ### GET
 
 - Verify the user is authenticated, consistent with `app/api/export/route.ts`.
-- Read the single `company_context` row.
-- Return `{ data: ... }` or `{ data: null }`.
+- Read the latest `company_context` row.
+- Return a simple shape such as `{ data: ... }` or `{ data: null }`.
 
 ### POST
 
@@ -124,19 +134,17 @@ type CompanyContextPayload = {
 };
 ```
 
-Store `service_areas` as a text field in the database. In the UI, the tag input can serialize to a comma-separated string unless the user asks for a different format.
-
 ## Setup Page
 
 Create `app/dashboard/setup/page.tsx`. Prefer adding new components rather than editing current dashboard files.
 
-If the form has meaningful client interactivity, place it in a new client component such as `components/dashboard/company-setup-form.tsx` and keep the page itself server-rendered.
+If the form has meaningful client interactivity, place it in a local client component such as `components/dashboard/company-setup-form.tsx`.
 
 ### UI requirements
 
 - 3-step form
 - Existing dark Tailwind language
-- Accent color `#c9a84c`
+- Accent color `#FF6B00`
 - Top progress bar showing step `1 / 2 / 3`
 - Last-updated banner when data already exists
 - Submit posts to `/api/leads/gather-context`
@@ -179,30 +187,18 @@ When the page loads:
 2. Pre-fill all fields if data exists.
 3. Show a banner like `Last updated [date]`.
 
-Keep the GET and POST route as the system of record even if the initial page load reads from Supabase directly.
+Keep the route as the system of record even if the initial page load reads from Supabase directly.
 
 ## Toasts
 
-Before implementing a toast:
-
-1. Search the repo for an existing toast library or pattern.
-2. Reuse it if present.
-3. If none exists, ask before adding a new dependency unless the user already approved dependency changes.
-
-If no toast library exists and the user does not want new dependencies, use a lightweight inline success state instead of silently ignoring the requirement.
+Before implementing a toast, search for an existing toast pattern first. If none exists and no dependency change was requested, use a lightweight inline success state instead of adding a new package by default.
 
 ## Navigation Link
 
-Locate the actual dashboard nav or sidebar entry point before editing.
+Use the existing dashboard nav entry point:
 
-Allowed existing-file change:
-
-- Add a `Setup` link to `/dashboard/setup`
-- Add a yellow warning dot when `company_context` is empty
-
-Do not use this as permission to refactor the surrounding dashboard layout.
-
-If the current repo does not yet have a reusable sidebar/nav component, ask before introducing a wider dashboard shell just to host the link.
+- Add or preserve a `Setup` link to `/dashboard/setup`
+- Show a warning dot when `company_context` is empty
 
 ## Warning Dot Logic
 
@@ -212,16 +208,6 @@ Preferred logic:
 
 - Treat the setup as incomplete when no `company_context` row exists.
 - If a stricter rule is requested later, derive completeness from required fields rather than just row presence.
-
-## Auth And Data Access
-
-Follow current portal auth behavior:
-
-- Server-rendered pages may read with `createClient()` from `lib/supabase/server.ts`
-- Browser interactions may use `lib/supabase/client.ts` if needed
-- Admin-only writes should use `createAdminClient()` from route handlers when RLS would otherwise block the operation
-
-Do not invent a second auth system.
 
 ## Verification
 
@@ -234,11 +220,3 @@ After implementation, validate at least these:
 5. Submit success returns the user to `/dashboard`
 6. Nav warning dot disappears once context exists
 7. Lints pass for touched files
-
-## Output Style
-
-When completing the task:
-
-- Briefly summarize what was added
-- Mention any assumptions, especially around nav placement or toast behavior
-- Call out if a dependency would be needed for a real toast
