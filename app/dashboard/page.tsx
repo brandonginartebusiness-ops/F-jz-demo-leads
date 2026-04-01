@@ -20,11 +20,11 @@ export default async function DashboardPage({ searchParams }: Props) {
 
   return (
     <main className="mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mb-8 flex flex-col gap-6 rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
+      <div className="mb-8 flex flex-col gap-6 rounded-3xl bg-[#1a1a1a] p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm uppercase tracking-[0.3em] text-[#C0C0C0]">
-            Internal dashboard
+              Internal dashboard
             </p>
             <h1 className="mt-3 text-3xl font-semibold text-white">
               Miami-Dade demolition permits
