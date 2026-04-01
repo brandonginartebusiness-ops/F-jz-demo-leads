@@ -21,12 +21,20 @@ export const companyContextSchema = z.object({
   target_market: z.string().trim().max(1000).optional().default(""),
   value_prop: z.string().trim().min(1, "Value proposition is required").max(2000),
   differentiators: z.string().trim().min(1, "Differentiators are required").max(2000),
-  avg_project_size: z.enum(PROJECT_SIZE_OPTIONS, {
-    errorMap: () => ({ message: "Select an average project size" }),
-  }),
-  tone: z.enum(TONE_OPTIONS, {
-    errorMap: () => ({ message: "Select a tone" }),
-  }),
+  avg_project_size: z
+    .string()
+    .refine(
+      (value): value is (typeof PROJECT_SIZE_OPTIONS)[number] =>
+        PROJECT_SIZE_OPTIONS.includes(value as (typeof PROJECT_SIZE_OPTIONS)[number]),
+      "Select an average project size",
+    ),
+  tone: z
+    .string()
+    .refine(
+      (value): value is (typeof TONE_OPTIONS)[number] =>
+        TONE_OPTIONS.includes(value as (typeof TONE_OPTIONS)[number]),
+      "Select a tone",
+    ),
 });
 
 export type CompanyContextPayload = z.infer<typeof companyContextSchema>;
