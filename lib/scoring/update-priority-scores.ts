@@ -40,13 +40,15 @@ export async function updatePriorityScores() {
     };
   });
 
-  const { error: updateError } = await admin.from("permits").upsert(updates, {
-    onConflict: "id",
-      ignoreDuplicates: false,
-  });
+  for (const update of updates) {
+    const { error: updateError } = await admin
+      .from("permits")
+      .update({ priority_score: update.priority_score })
+      .eq("id", update.id);
 
-  if (updateError) {
-    throw updateError;
+    if (updateError) {
+      throw updateError;
+    }
   }
 
   return { updatedCount: updates.length };
