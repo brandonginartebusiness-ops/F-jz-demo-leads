@@ -10,27 +10,16 @@ type TagInputProps = {
   placeholder?: string;
 };
 
-export function TagInput({
-  label,
-  values,
-  onChange,
-  presets = [],
-  placeholder,
-}: TagInputProps) {
+export function TagInput({ label, values, onChange, presets = [], placeholder }: TagInputProps) {
   const [draft, setDraft] = useState("");
 
   function addValue(value: string) {
     const nextValue = value.trim();
-
-    if (!nextValue) {
-      return;
-    }
-
+    if (!nextValue) return;
     if (values.some((item) => item.toLowerCase() === nextValue.toLowerCase())) {
       setDraft("");
       return;
     }
-
     onChange([...values, nextValue]);
     setDraft("");
   }
@@ -41,23 +30,23 @@ export function TagInput({
 
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium text-white">{label}</label>
-      <div className="panel p-3">
+      <label className="label-stencil mb-2 block">{label}</label>
+      <div className="card p-3">
         <div className="flex flex-wrap gap-2">
           {values.map((value) => (
             <button
               key={value}
-              className="rounded-full border border-border bg-accent/10 px-3 py-1 text-sm text-silver transition hover:border-accent"
+              className="rounded border border-accent/30 bg-accent/10 px-3 py-1 text-sm text-sand-light transition-colors hover:bg-accent/20"
               onClick={() => removeValue(value)}
               type="button"
             >
-              {value} x
+              {value} ×
             </button>
           ))}
         </div>
 
         <input
-          className="input-base mt-3"
+          className="input mt-3"
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
@@ -73,14 +62,13 @@ export function TagInput({
           <div className="mt-3 flex flex-wrap gap-2">
             {presets.map((preset) => {
               const isSelected = values.includes(preset);
-
               return (
                 <button
                   key={preset}
-                  className={`rounded-full border px-3 py-1 text-sm transition ${
+                  className={`rounded border px-3 py-1 text-sm transition-all duration-200 ${
                     isSelected
-                      ? "border-accent bg-accent text-background"
-                      : "border-border bg-panel text-silver hover:border-accent"
+                      ? "border-accent bg-accent text-white"
+                      : "border-stroke text-sand hover:border-sand/30 hover:text-sand-bright"
                   }`}
                   onClick={() => addValue(preset)}
                   type="button"

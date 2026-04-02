@@ -20,9 +20,9 @@ type AnalyticsState =
 
 function StatSkeleton() {
   return (
-    <div className="panel-lg p-5">
-      <div className="skeleton h-3 w-24 rounded" />
-      <div className="skeleton mt-4 h-8 w-20 rounded" />
+    <div className="card-accent p-5">
+      <div className="skel h-3 w-20 rounded" />
+      <div className="skel mt-4 h-9 w-24 rounded" />
     </div>
   );
 }
@@ -45,17 +45,12 @@ export function AnalyticsDashboard() {
         });
 
         if (!response.ok) {
-          const payload = (await response.json().catch(() => null)) as
-            | { error?: string }
-            | null;
+          const payload = (await response.json().catch(() => null)) as { error?: string } | null;
           throw new Error(payload?.error ?? "Failed to load analytics.");
         }
 
         const data = (await response.json()) as AnalyticsData;
-
-        if (!cancelled) {
-          setState({ status: "ready", data, error: null });
-        }
+        if (!cancelled) setState({ status: "ready", data, error: null });
       } catch (error) {
         if (!cancelled) {
           setState({
@@ -68,29 +63,18 @@ export function AnalyticsDashboard() {
     }
 
     void loadAnalytics();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   if (state.status === "loading") {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-6 animate-enter">
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <StatSkeleton key={i} />
-          ))}
+          {Array.from({ length: 5 }).map((_, i) => <StatSkeleton key={i} />)}
         </section>
         <div className="grid gap-6 xl:grid-cols-2">
-          <div className="panel-lg p-6">
-            <div className="skeleton h-4 w-32 rounded" />
-            <div className="skeleton mt-4 h-80 w-full rounded-xl" />
-          </div>
-          <div className="panel-lg p-6">
-            <div className="skeleton h-4 w-32 rounded" />
-            <div className="skeleton mt-4 h-80 w-full rounded-xl" />
-          </div>
+          <div className="card p-6"><div className="skel h-4 w-32 rounded" /><div className="skel mt-4 h-96 w-full rounded-lg" /></div>
+          <div className="card p-6"><div className="skel h-4 w-32 rounded" /><div className="skel mt-4 h-96 w-full rounded-lg" /></div>
         </div>
       </div>
     );
@@ -98,92 +82,81 @@ export function AnalyticsDashboard() {
 
   if (state.status === "error") {
     return (
-      <section className="panel-lg p-6">
-        <h2 className="text-lg font-semibold text-white">Analytics unavailable</h2>
-        <p className="mt-2 text-sm text-muted">{state.error}</p>
+      <section className="card p-6">
+        <h2 className="font-display text-xl text-sand-bright">ANALYTICS UNAVAILABLE</h2>
+        <p className="mt-2 text-sm text-sand">{state.error}</p>
       </section>
     );
   }
 
-  const analytics = state.data;
+  const a = state.data;
+  const stats = [
+    { label: "Total Permits", value: a.topStats.totalPermits.toLocaleString() },
+    { label: "Pipeline Value", value: formatCurrency(a.topStats.pipelineValue) },
+    { label: "New This Week", value: a.topStats.newThisWeek.toLocaleString() },
+    { label: "Contacted", value: a.topStats.leadsContacted.toLocaleString() },
+    { label: "Actions / Wk", value: a.topStats.activityThisWeek.toLocaleString() },
+  ];
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-enter">
+      {/* Stat cards */}
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        {[
-          { label: "Total permits", value: analytics.topStats.totalPermits.toLocaleString() },
-          { label: "Pipeline value", value: formatCurrency(analytics.topStats.pipelineValue) },
-          { label: "New this week", value: analytics.topStats.newThisWeek.toLocaleString() },
-          { label: "Leads contacted", value: analytics.topStats.leadsContacted.toLocaleString() },
-          { label: "Actions this week", value: analytics.topStats.activityThisWeek.toLocaleString() },
-        ].map((stat, i) => (
+        {stats.map((stat, i) => (
           <div
             key={stat.label}
-            className="panel-lg p-5 animate-slide-up"
-            style={{ animationDelay: `${i * 80}ms` }}
+            className="card-accent p-5 animate-enter-scale"
+            style={{ animationDelay: `${i * 70}ms` }}
           >
-            <p className="section-label">{stat.label}</p>
-            <p className="mt-3 text-3xl font-semibold text-white">{stat.value}</p>
+            <p className="label-stencil">{stat.label}</p>
+            <p className="mt-2 stat-value">{stat.value}</p>
           </div>
         ))}
       </section>
 
+      {/* Charts */}
       <div className="mt-6">
         <AnalyticsCharts
-          leadStatusBreakdown={analytics.leadStatusBreakdown}
-          permitsOverTime={analytics.permitsOverTime}
+          leadStatusBreakdown={a.leadStatusBreakdown}
+          permitsOverTime={a.permitsOverTime}
         />
       </div>
 
+      {/* Priority + Contractors */}
       <div className="mt-6 grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-        <section className="panel-lg p-6">
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold text-white">Priority Breakdown</h2>
-            <p className="mt-1 text-sm text-muted">
-              Lead priority derived from estimated value tiers.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            {analytics.priorityBreakdown.map((priority) => (
-              <div
-                key={priority.name}
-                className="inline-flex items-center gap-3 rounded-2xl border border-border bg-panel-soft px-4 py-3"
-              >
-                <span className="text-sm font-medium text-silver">{priority.name}</span>
-                <span className="rounded-full bg-accent/10 px-3 py-1 text-sm font-semibold text-white">
-                  {priority.value.toLocaleString()}
+        <section className="card p-6">
+          <h2 className="font-display text-xl text-sand-bright">PRIORITY BREAKDOWN</h2>
+          <p className="mt-1 text-sm text-sand">Lead priority by estimated value tier.</p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            {a.priorityBreakdown.map((p) => (
+              <div key={p.name} className="inline-flex items-center gap-2 rounded-lg border border-stroke bg-bg-soft px-4 py-2.5">
+                <span className="text-sm font-medium text-sand">{p.name}</span>
+                <span className="rounded border border-accent/20 bg-accent/10 px-2.5 py-0.5 font-display text-lg text-sand-bright">
+                  {p.value.toLocaleString()}
                 </span>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="panel-lg p-6">
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold text-white">Top Contractors</h2>
-            <p className="mt-1 text-sm text-muted">
-              Top 10 contractors ranked by permit count, with total pipeline value.
-            </p>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border text-sm">
-              <thead className="text-left section-label">
-                <tr>
-                  <th className="px-0 py-3">Contractor</th>
-                  <th className="px-0 py-3">Permits</th>
-                  <th className="px-0 py-3 text-right">Total value</th>
+        <section className="card p-6">
+          <h2 className="font-display text-xl text-sand-bright">TOP CONTRACTORS</h2>
+          <p className="mt-1 text-sm text-sand">Top 10 by permit count + pipeline value.</p>
+          <div className="mt-5 overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="border-b border-stroke text-left">
+                <tr className="label-stencil">
+                  <th className="pb-3 pr-4">Contractor</th>
+                  <th className="pb-3 pr-4">Permits</th>
+                  <th className="pb-3 text-right">Total value</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
-                {analytics.topContractors.map((contractor) => (
-                  <tr key={contractor.name}>
-                    <td className="px-0 py-4 text-white">{contractor.name}</td>
-                    <td className="px-0 py-4 text-silver">
-                      {contractor.permitCount.toLocaleString()}
-                    </td>
-                    <td className="px-0 py-4 text-right text-silver">
-                      {formatCurrency(contractor.totalEstimatedValue)}
-                    </td>
+              <tbody className="divide-y divide-stroke">
+                {a.topContractors.map((c) => (
+                  <tr key={c.name}>
+                    <td className="py-3 pr-4 text-sand-bright">{c.name}</td>
+                    <td className="py-3 pr-4 font-mono text-sand">{c.permitCount.toLocaleString()}</td>
+                    <td className="py-3 text-right font-mono text-sand">{formatCurrency(c.totalEstimatedValue)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -192,29 +165,24 @@ export function AnalyticsDashboard() {
         </section>
       </div>
 
+      {/* Active areas */}
       <div className="mt-6">
-        <section className="panel-lg p-6">
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold text-white">Most Active Areas</h2>
-            <p className="mt-1 text-sm text-muted">
-              Top 10 street-area groups based on the first word in each address.
-            </p>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border text-sm">
-              <thead className="text-left section-label">
-                <tr>
-                  <th className="px-0 py-3">Area</th>
-                  <th className="px-0 py-3 text-right">Permit count</th>
+        <section className="card p-6">
+          <h2 className="font-display text-xl text-sand-bright">MOST ACTIVE AREAS</h2>
+          <p className="mt-1 text-sm text-sand">Top 10 street-area groups by first address word.</p>
+          <div className="mt-5 overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="border-b border-stroke text-left">
+                <tr className="label-stencil">
+                  <th className="pb-3 pr-4">Area</th>
+                  <th className="pb-3 text-right">Permit count</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
-                {analytics.activeNeighborhoods.map((area) => (
-                  <tr key={area.area}>
-                    <td className="px-0 py-4 text-white">{area.area}</td>
-                    <td className="px-0 py-4 text-right text-silver">
-                      {area.permitCount.toLocaleString()}
-                    </td>
+              <tbody className="divide-y divide-stroke">
+                {a.activeNeighborhoods.map((n) => (
+                  <tr key={n.area}>
+                    <td className="py-3 pr-4 text-sand-bright">{n.area}</td>
+                    <td className="py-3 text-right font-mono text-sand">{n.permitCount.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>

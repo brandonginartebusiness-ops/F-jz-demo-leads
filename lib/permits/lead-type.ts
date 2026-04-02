@@ -84,15 +84,15 @@ export function getLeadTypeLabel(leadType: LeadType | string | null | undefined)
 export function getLeadTypeStyles(leadType: LeadType | string | null | undefined) {
   switch (leadType) {
     case "full_demolition":
-      return "bg-[#22c55e]/15 text-[#86efac]";
+      return "bg-teal/15 text-teal border-teal/30";
     case "partial_demolition":
-      return "bg-[#facc15]/15 text-[#fde68a]";
+      return "bg-amber/15 text-amber border-amber/30";
     case "demo_related":
-      return "bg-muted/15 text-silver";
+      return "bg-bg-soft text-sand border-stroke";
     case "junk":
-      return "bg-[#ef4444]/15 text-[#fca5a5]";
+      return "bg-red-500/10 text-red-400 border-red-500/20";
     default:
-      return "bg-[#525252]/15 text-silver";
+      return "bg-bg-soft text-sand border-stroke";
   }
 }
 

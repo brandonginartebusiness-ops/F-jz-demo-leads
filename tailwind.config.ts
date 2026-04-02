@@ -9,43 +9,66 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-        panel: {
-          DEFAULT: "var(--panel)",
-          soft: "var(--panel-soft)",
+        bg: {
+          DEFAULT: "#0C0A09",
+          raised: "#1C1917",
+          soft: "#292524",
+          hover: "#44403C",
         },
         accent: {
-          DEFAULT: "var(--accent)",
-          hover: "var(--accent-hover)",
-          muted: "rgba(255, 107, 0, 0.12)",
+          DEFAULT: "#FF5E00",
+          hover: "#FF7A2E",
+          muted: "rgba(255, 94, 0, 0.12)",
+          glow: "rgba(255, 94, 0, 0.25)",
         },
-        silver: "var(--text-silver)",
-        muted: "var(--text-muted)",
-        border: "var(--border)",
+        amber: "#F59E0B",
+        teal: "#0D9488",
+        sand: {
+          DEFAULT: "#A8A29E",
+          light: "#D6D3D1",
+          bright: "#FAFAF9",
+        },
+        stroke: "rgba(168, 162, 158, 0.15)",
+        "stroke-accent": "rgba(255, 94, 0, 0.3)",
+      },
+      fontFamily: {
+        display: ["var(--font-bebas)", "Impact", "sans-serif"],
+        body: ["var(--font-outfit)", "system-ui", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "Menlo", "monospace"],
       },
       letterSpacing: {
-        label: "0.2em",
-        heading: "0.3em",
+        stencil: "0.15em",
+        wide: "0.06em",
+      },
+      borderRadius: {
+        sm: "6px",
+        DEFAULT: "10px",
+        lg: "14px",
+        xl: "20px",
       },
       keyframes: {
-        "fade-in": {
-          from: { opacity: "0", transform: "translateY(8px)" },
+        "enter": {
+          from: { opacity: "0", transform: "translateY(12px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
-        "slide-up": {
-          from: { opacity: "0", transform: "translateY(16px)" },
-          to: { opacity: "1", transform: "translateY(0)" },
+        "enter-scale": {
+          from: { opacity: "0", transform: "scale(0.96) translateY(8px)" },
+          to: { opacity: "1", transform: "scale(1) translateY(0)" },
         },
         shimmer: {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
         },
+        pulse: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.5" },
+        },
       },
       animation: {
-        "fade-in": "fade-in 0.4s ease-out both",
-        "slide-up": "slide-up 0.5s ease-out both",
-        shimmer: "shimmer 1.8s ease-in-out infinite",
+        enter: "enter 0.5s ease-out both",
+        "enter-scale": "enter-scale 0.4s ease-out both",
+        shimmer: "shimmer 2s ease-in-out infinite",
+        pulse: "pulse 2s ease-in-out infinite",
       },
     },
   },

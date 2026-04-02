@@ -16,58 +16,57 @@ type SortKey = "date" | "address" | "value" | "sqft" | "floors" | "priority";
 type SortDir = "asc" | "desc";
 
 function formatDate(value: string | null) {
-  if (!value) return "N/A";
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
-    new Date(value),
-  );
+  if (!value) return "—";
+  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(value));
 }
-
-function SortIcon({ active, direction }: { active: boolean; direction: SortDir }) {
-  if (!active) {
-    return <span className="ml-1 text-muted/40">&darr;</span>;
-  }
-  return (
-    <span className="ml-1 text-accent">
-      {direction === "asc" ? "\u2191" : "\u2193"}
-    </span>
-  );
-}
-
-const SORTABLE_COLUMNS: Array<{ key: SortKey; label: string }> = [
-  { key: "date", label: "Date" },
-  { key: "address", label: "Address" },
-];
-
-const STATIC_COLUMNS = ["Type", "Description"];
-
-const SORTABLE_NUMERIC: Array<{ key: SortKey; label: string }> = [
-  { key: "value", label: "Value" },
-  { key: "sqft", label: "Sq Ft" },
-  { key: "floors", label: "Floors" },
-];
 
 function getSortValue(permit: PermitRecord, key: SortKey): string | number {
   switch (key) {
-    case "date":
-      return permit.permit_issued_date ?? "";
-    case "address":
-      return permit.property_address ?? "";
-    case "value":
-      return permit.estimated_value ?? 0;
-    case "sqft":
-      return permit.square_footage ?? 0;
-    case "floors":
-      return permit.structure_floors ?? 0;
-    case "priority":
-      return permit.priority_score ?? 0;
+    case "date": return permit.permit_issued_date ?? "";
+    case "address": return permit.property_address ?? "";
+    case "value": return permit.estimated_value ?? 0;
+    case "sqft": return permit.square_footage ?? 0;
+    case "floors": return permit.structure_floors ?? 0;
+    case "priority": return permit.priority_score ?? 0;
   }
+}
+
+function SortHeader({
+  label,
+  sortKey: key,
+  activeSortKey,
+  sortDir,
+  onSort,
+}: {
+  label: string;
+  sortKey: SortKey;
+  activeSortKey: SortKey | null;
+  sortDir: SortDir;
+  onSort: (key: SortKey) => void;
+}) {
+  const active = activeSortKey === key;
+  return (
+    <th className="px-4 py-3">
+      <button
+        aria-label={`Sort by ${label}`}
+        className={`inline-flex items-center gap-1 transition-colors hover:text-sand-bright ${active ? "text-accent" : ""}`}
+        onClick={() => onSort(key)}
+        type="button"
+      >
+        {label}
+        <span className="text-[10px]">
+          {active ? (sortDir === "asc" ? "▲" : "▼") : "⇅"}
+        </span>
+      </button>
+    </th>
+  );
 }
 
 export function PermitsTable({ permits }: Props) {
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>("desc");
 
-  function toggleSort(key: SortKey) {
+  function handleSort(key: SortKey) {
     if (sortKey === key) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     } else {
@@ -86,42 +85,30 @@ export function PermitsTable({ permits }: Props) {
     });
   }, [permits, sortKey, sortDir]);
 
-  function SortButton({ sortKeyValue, children }: { sortKeyValue: SortKey; children: React.ReactNode }) {
-    return (
-      <button
-        aria-label={`Sort by ${children}`}
-        className="inline-flex items-center hover:text-silver transition-colors"
-        onClick={() => toggleSort(sortKeyValue)}
-        type="button"
-      >
-        {children}
-        <SortIcon active={sortKey === sortKeyValue} direction={sortDir} />
-      </button>
-    );
-  }
-
   return (
     <>
       {/* Mobile card view */}
-      <div className="space-y-3 md:hidden">
+      <div className="space-y-2 md:hidden">
         {sorted.map((permit) => (
           <Link
             key={permit.id}
-            className="block panel p-4 transition hover:border-accent"
+            className="block card p-4 transition-all duration-200 hover:border-sand/30"
             href={`/dashboard/${permit.id}`}
           >
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-medium text-white">
+              <div className="min-w-0">
+                <p className="truncate font-medium text-sand-bright">
                   {permit.property_address || "Unknown address"}
                 </p>
-                <p className="mt-1 text-xs text-muted">{formatDate(permit.permit_issued_date)}</p>
+                <p className="mt-0.5 font-mono text-xs text-sand/60">
+                  {formatDate(permit.permit_issued_date)}
+                </p>
               </div>
               <PriorityBadge score={permit.priority_score} />
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <LeadTypeBadge leadType={permit.lead_type} />
-              <span className="text-sm text-silver">
+              <span className="font-mono text-sm text-sand">
                 {formatEstimatedValue(permit.estimated_value)}
               </span>
             </div>
@@ -129,71 +116,68 @@ export function PermitsTable({ permits }: Props) {
         ))}
       </div>
 
-      {/* Desktop table view */}
-      <div className="hidden md:block overflow-hidden panel" aria-label="Demolition permits">
+      {/* Desktop table */}
+      <div className="hidden md:block card overflow-hidden" aria-label="Demolition permits">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-border text-sm">
-            <thead className="sticky top-0 z-10 bg-panel-soft text-left section-label">
-              <tr>
-                {SORTABLE_COLUMNS.map((col) => (
-                  <th key={col.key} className="px-4 py-3">
-                    <SortButton sortKeyValue={col.key}>{col.label}</SortButton>
-                  </th>
-                ))}
-                {STATIC_COLUMNS.map((label) => (
-                  <th key={label} className="px-4 py-3">{label}</th>
-                ))}
-                {SORTABLE_NUMERIC.map((col) => (
-                  <th key={col.key} className="px-4 py-3">
-                    <SortButton sortKeyValue={col.key}>{col.label}</SortButton>
-                  </th>
-                ))}
+          <table className="min-w-full text-sm">
+            <thead className="sticky top-0 z-10 border-b border-stroke bg-bg-soft text-left">
+              <tr className="label-stencil">
+                <SortHeader label="Date" sortKey="date" activeSortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                <SortHeader label="Address" sortKey="address" activeSortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                <th className="px-4 py-3">Type</th>
+                <th className="px-4 py-3">Description</th>
+                <SortHeader label="Value" sortKey="value" activeSortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                <SortHeader label="Sq Ft" sortKey="sqft" activeSortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                <SortHeader label="Floors" sortKey="floors" activeSortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                 <th className="px-4 py-3">Owner</th>
                 <th className="px-4 py-3">Contractor</th>
                 <th className="px-4 py-3">Phone</th>
-                <th className="px-4 py-3">
-                  <SortButton sortKeyValue="priority">Priority</SortButton>
-                </th>
-                <th className="px-4 py-3">Lead status</th>
+                <SortHeader label="Priority" sortKey="priority" activeSortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                <th className="px-4 py-3">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-stroke">
               {sorted.map((permit) => (
-                <tr key={permit.id} className="transition-colors duration-150 hover:bg-panel-soft/60">
-                  <td className="px-4 py-4 text-white/80">{formatDate(permit.permit_issued_date)}</td>
-                  <td className="px-4 py-4">
+                <tr
+                  key={permit.id}
+                  className="transition-colors duration-150 hover:bg-bg-soft/60"
+                >
+                  <td className="whitespace-nowrap px-4 py-3.5 font-mono text-xs text-sand">
+                    {formatDate(permit.permit_issued_date)}
+                  </td>
+                  <td className="px-4 py-3.5">
                     <Link
-                      className="font-medium text-white underline-offset-2 transition hover:text-silver hover:underline"
+                      className="font-medium text-sand-bright transition-colors hover:text-accent"
                       href={`/dashboard/${permit.id}`}
                     >
                       {permit.property_address || "Unknown address"}
                     </Link>
-                    <p className="mt-1 text-xs text-muted">{permit.permit_number}</p>
+                    <p className="mt-0.5 font-mono text-[11px] text-sand/50">{permit.permit_number}</p>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-4 py-3.5">
                     <LeadTypeBadge leadType={permit.lead_type} />
                   </td>
-                  <td className="max-w-[200px] truncate px-4 py-4 text-white/80">
-                    {permit.detail_description || "N/A"}
+                  <td className="max-w-[180px] truncate px-4 py-3.5 text-sand">
+                    {permit.detail_description || "—"}
                   </td>
-                  <td className="px-4 py-4 text-white/80">
+                  <td className="whitespace-nowrap px-4 py-3.5 font-mono text-sand">
                     {formatEstimatedValue(permit.estimated_value)}
                   </td>
-                  <td className="px-4 py-4 text-white/80">
-                    {permit.square_footage?.toLocaleString() ?? "N/A"}
+                  <td className="whitespace-nowrap px-4 py-3.5 font-mono text-sand">
+                    {permit.square_footage?.toLocaleString() ?? "—"}
                   </td>
-                  <td className="px-4 py-4 text-white/80">{permit.structure_floors ?? "N/A"}</td>
-                  <td className="px-4 py-4 text-white/80">{permit.owner_name || "N/A"}</td>
-                  <td className="px-4 py-4 text-white/80">
-                    {permit.contractor_name || "Unknown contractor"}
+                  <td className="px-4 py-3.5 font-mono text-sand">{permit.structure_floors ?? "—"}</td>
+                  <td className="px-4 py-3.5 text-sand">{permit.owner_name || "—"}</td>
+                  <td className="px-4 py-3.5 text-sand">{permit.contractor_name || "—"}</td>
+                  <td className="whitespace-nowrap px-4 py-3.5 font-mono text-xs text-sand">
+                    {permit.contractor_phone || "—"}
                   </td>
-                  <td className="px-4 py-4 text-white/80">{permit.contractor_phone || "N/A"}</td>
-                  <td className="px-4 py-4">
+                  <td className="px-4 py-3.5">
                     <PriorityBadge score={permit.priority_score} />
                   </td>
-                  <td className="px-4 py-4">
-                    <span className="rounded-full bg-accent/15 px-3 py-1 text-xs font-medium text-silver">
-                      {permit.lead_status}
+                  <td className="px-4 py-3.5">
+                    <span className="rounded border border-stroke bg-bg-soft px-2.5 py-1 text-xs font-medium capitalize text-sand">
+                      {(permit.lead_status ?? "new").replace("_", " ")}
                     </span>
                   </td>
                 </tr>

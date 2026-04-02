@@ -21,29 +21,29 @@ export default async function DashboardPage({ searchParams }: Props) {
 
   return (
     <main id="main-content" className="mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mb-8 flex flex-col gap-6 rounded-3xl bg-panel p-6 animate-fade-in">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      {/* Header */}
+      <header className="hazard-top mb-8 card p-6 animate-enter">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="page-label">
-              Internal dashboard
-            </p>
-            <h1 className="mt-3 text-3xl font-semibold text-white">
-              Miami-Dade demolition leads
+            <p className="label-stencil text-accent">Internal Dashboard</p>
+            <h1 className="mt-2 font-display text-4xl text-sand-bright lg:text-5xl">
+              MIAMI-DADE DEMOLITION LEADS
             </h1>
-            <p className="mt-3 max-w-2xl text-sm text-muted">
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-sand">
               Review official demolition permits plus hidden demo-related commercial
               jobs, prioritize the strongest opportunities, and move each lead through
               your outreach pipeline.
             </p>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-            <div className="stat-card">
-              <p className="section-label">Records</p>
-              <p className="mt-1 text-xl font-semibold text-white">{permits.length}</p>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
+            <div className="card-accent px-5 py-3">
+              <p className="label-stencil">Records</p>
+              <p className="mt-1 stat-value-sm">{permits.length}</p>
             </div>
-            <div className="stat-card">
-              <p className="section-label">Pipeline value</p>
-              <p className="mt-1 text-xl font-semibold text-white">
+            <div className="card-accent px-5 py-3">
+              <p className="label-stencil">Pipeline</p>
+              <p className="mt-1 stat-value-sm font-mono">
                 {new Intl.NumberFormat("en-US", {
                   style: "currency",
                   currency: "USD",
@@ -54,18 +54,22 @@ export default async function DashboardPage({ searchParams }: Props) {
             <SignOutButton />
           </div>
         </div>
-        <DashboardNav
-          currentPath="/dashboard"
-          showSetupWarning={!companyContext}
-        />
-      </div>
 
-      <div className="space-y-6">
+        <div className="mt-6 border-t border-stroke pt-4">
+          <DashboardNav currentPath="/dashboard" showSetupWarning={!companyContext} />
+        </div>
+      </header>
+
+      {/* Content */}
+      <div className="space-y-5">
         <DashboardFilters searchParams={searchParams} />
 
         {permits.length === 0 ? (
-          <div className="panel border-dashed p-10 text-center text-muted">
-            No permits match the current filters yet.
+          <div className="card border-dashed p-12 text-center">
+            <p className="font-display text-2xl text-sand/50">NO PERMITS MATCH</p>
+            <p className="mt-2 text-sm text-sand/40">
+              Try adjusting your filters or resetting to see all leads.
+            </p>
           </div>
         ) : searchParams.view === "cards" ? (
           <PermitsCards permits={permits} />

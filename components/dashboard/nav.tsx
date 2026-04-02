@@ -23,7 +23,7 @@ export function DashboardNav({
   showSetupWarning,
 }: DashboardNavProps) {
   return (
-    <nav aria-label="Dashboard navigation" className="flex flex-wrap gap-3">
+    <nav aria-label="Dashboard navigation" className="flex flex-wrap gap-2">
       {links.map((link) => {
         const isActive = currentPath === link.href;
 
@@ -31,16 +31,19 @@ export function DashboardNav({
           <Link
             key={link.href}
             aria-current={isActive ? "page" : undefined}
-            className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition ${
+            className={`inline-flex items-center gap-2 rounded px-4 py-2 text-sm font-medium transition-all duration-200 ${
               isActive
-                ? "border-accent bg-accent-muted text-accent"
-                : "border-border bg-panel text-silver hover:border-accent"
+                ? "bg-accent text-white shadow-lg shadow-accent/20"
+                : "border border-stroke text-sand hover:border-sand/30 hover:text-sand-bright hover:bg-bg-soft"
             }`}
             href={link.href}
           >
-            <span>{link.label}</span>
+            <span className="font-body tracking-wide">{link.label}</span>
             {link.href === "/dashboard/setup" && showSetupWarning ? (
-              <span aria-label="Needs setup" className="h-2.5 w-2.5 rounded-full bg-accent-hover" />
+              <span
+                aria-label="Needs setup"
+                className="h-2 w-2 rounded-full bg-amber animate-pulse"
+              />
             ) : null}
           </Link>
         );

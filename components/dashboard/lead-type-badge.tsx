@@ -8,9 +8,7 @@ type Props = {
 export function LeadTypeBadge({ leadType }: Props) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${getLeadTypeStyles(
-        leadType,
-      )}`}
+      className={`inline-flex items-center rounded border px-2.5 py-1 text-xs font-semibold uppercase tracking-stencil ${getLeadTypeStyles(leadType)}`}
     >
       {getLeadTypeLabel(leadType)}
     </span>

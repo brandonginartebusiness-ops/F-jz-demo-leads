@@ -32,16 +32,12 @@ export function LeadDetailForm({ permit }: Props) {
     try {
       const response = await fetch(`/api/permits/${permit.id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        const result = (await response.json().catch(() => null)) as
-          | { error?: string }
-          | null;
+        const result = (await response.json().catch(() => null)) as { error?: string } | null;
         throw new Error(result?.error ?? "Failed to save lead details.");
       }
 
@@ -49,9 +45,7 @@ export function LeadDetailForm({ permit }: Props) {
       router.refresh();
     } catch (submitError) {
       setError(
-        submitError instanceof Error
-          ? submitError.message
-          : "Failed to save lead details.",
+        submitError instanceof Error ? submitError.message : "Failed to save lead details.",
       );
     } finally {
       setIsSaving(false);
@@ -59,28 +53,24 @@ export function LeadDetailForm({ permit }: Props) {
   }
 
   return (
-    <form
-      className="space-y-5 panel p-6"
-      onSubmit={handleSubmit}
-    >
+    <form className="space-y-5" onSubmit={handleSubmit}>
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <p className="mb-2 block text-sm font-medium text-white">Lead type</p>
+          <p className="label-stencil mb-2">Lead type</p>
           <LeadTypeBadge leadType={permit.lead_type} />
         </div>
         <div>
-          <p className="mb-2 block text-sm font-medium text-white">Priority</p>
+          <p className="label-stencil mb-2">Priority</p>
           <PriorityBadge score={permit.priority_score} />
         </div>
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-white" htmlFor="lead_status">
-          Lead status
+        <label className="label-stencil mb-2 block" htmlFor="lead_status">
+          Status
         </label>
         <select
-          aria-label="Lead status"
-          className="input-base"
+          className="input"
           defaultValue={permit.lead_status}
           id="lead_status"
           name="lead_status"
@@ -95,31 +85,31 @@ export function LeadDetailForm({ permit }: Props) {
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-white" htmlFor="notes">
+        <label className="label-stencil mb-2 block" htmlFor="notes">
           Notes
         </label>
         <textarea
-          className="input-base min-h-40"
+          className="input min-h-40"
           defaultValue={permit.notes ?? ""}
           id="notes"
           name="notes"
-          placeholder="Add outreach notes, bid timing, and follow-up details."
+          placeholder="Add outreach notes, bid timing, follow-up details..."
         />
       </div>
 
-      <button
-        className="btn-primary"
-        disabled={isSaving}
-        type="submit"
-      >
-        {isSaving ? "Saving..." : "Save lead details"}
+      <button className="btn-accent" disabled={isSaving} type="submit">
+        {isSaving ? "SAVING..." : "SAVE LEAD DETAILS"}
       </button>
 
       {error ? (
-        <p aria-live="polite" className="text-sm text-[#ff8a80]" role="alert">{error}</p>
+        <p aria-live="polite" className="rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300" role="alert">
+          {error}
+        </p>
       ) : null}
       {successMessage ? (
-        <p aria-live="polite" className="text-sm text-silver">{successMessage}</p>
+        <p aria-live="polite" className="rounded border border-teal/30 bg-teal/10 px-3 py-2 text-sm text-teal">
+          {successMessage}
+        </p>
       ) : null}
     </form>
   );

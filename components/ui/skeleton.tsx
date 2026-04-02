@@ -3,5 +3,5 @@ type SkeletonProps = {
 };
 
 export function Skeleton({ className = "" }: SkeletonProps) {
-  return <div aria-hidden="true" className={`skeleton ${className}`} />;
+  return <div aria-hidden="true" className={`skel ${className}`} />;
 }

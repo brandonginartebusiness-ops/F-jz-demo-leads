@@ -41,11 +41,11 @@ export function LoginForm({ redirectTo = "/dashboard" }: Props) {
   return (
     <form action={handleSubmit} className="space-y-5">
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white" htmlFor="email">
+        <label className="label-stencil" htmlFor="email">
           Email
         </label>
         <input
-          className="input-base"
+          className="input"
           id="email"
           name="email"
           placeholder="team@jzdemolition.com"
@@ -55,11 +55,11 @@ export function LoginForm({ redirectTo = "/dashboard" }: Props) {
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white" htmlFor="password">
+        <label className="label-stencil" htmlFor="password">
           Password
         </label>
         <input
-          className="input-base"
+          className="input"
           id="password"
           name="password"
           required
@@ -70,20 +70,15 @@ export function LoginForm({ redirectTo = "/dashboard" }: Props) {
       {error ? (
         <p
           aria-live="polite"
-          className="rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200"
-          id="login-error"
+          className="rounded border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300"
           role="alert"
         >
           {error}
         </p>
       ) : null}
 
-      <button
-        className="btn-primary w-full"
-        disabled={loading}
-        type="submit"
-      >
-        {loading ? "Signing in..." : "Sign in"}
+      <button className="btn-accent w-full" disabled={loading} type="submit">
+        {loading ? "SIGNING IN..." : "SIGN IN"}
       </button>
     </form>
   );

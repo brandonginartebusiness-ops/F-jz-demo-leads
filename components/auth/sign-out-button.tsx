@@ -5,7 +5,7 @@ export function SignOutButton() {
     <form action={signOut}>
       <button
         aria-label="Sign out of dashboard"
-        className="btn-outline-sm bg-panel"
+        className="btn-ghost-sm"
         type="submit"
       >
         Sign out

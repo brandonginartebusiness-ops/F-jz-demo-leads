@@ -9,15 +9,15 @@ export function PriorityBadge({ score }: Props) {
   const normalizedLabel = getPriorityLabel(normalizedScore);
   const styles =
     normalizedLabel === "Hot"
-      ? "bg-accent/15 text-accent"
+      ? "bg-accent/15 text-accent border-accent/30"
       : normalizedLabel === "Warm"
-        ? "bg-[#FFB347]/15 text-[#FFB347]"
-        : "bg-muted/15 text-silver";
+        ? "bg-amber/15 text-amber border-amber/30"
+        : "bg-bg-soft text-sand border-stroke";
 
   return (
-    <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${styles}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded border px-2.5 py-1 text-xs font-semibold tracking-wide ${styles}`}>
       <span>{normalizedLabel}</span>
-      <span>{normalizedScore}</span>
+      <span className="font-mono text-[10px] opacity-70">{normalizedScore}</span>
     </span>
   );
 }

@@ -7,53 +7,42 @@ import { getLatestCompanyContext } from "@/lib/company-context/queries";
 import { createClient } from "@/lib/supabase/server";
 
 const AnalyticsDashboard = dynamic(
-  () =>
-    import("@/components/dashboard/analytics-dashboard").then(
-      (m) => m.AnalyticsDashboard,
-    ),
+  () => import("@/components/dashboard/analytics-dashboard").then((m) => m.AnalyticsDashboard),
   { ssr: false },
 );
 
 export default async function AnalyticsPage() {
   const supabase = createClient();
   const companyContext = await getLatestCompanyContext();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login?next=/dashboard/analytics");
-  }
+  if (!user) redirect("/login?next=/dashboard/analytics");
 
   return (
     <main id="main-content" className="mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mb-8 flex flex-col gap-6 rounded-3xl bg-panel p-6 animate-fade-in">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <header className="hazard-top mb-8 card p-6 animate-enter">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="page-label">
-              Performance analytics
-            </p>
-            <h1 className="mt-3 text-3xl font-semibold text-white">
-              Demolition pipeline analytics
+            <p className="label-stencil text-accent">Performance Analytics</p>
+            <h1 className="mt-2 font-display text-4xl text-sand-bright lg:text-5xl">
+              PIPELINE ANALYTICS
             </h1>
-            <p className="mt-3 max-w-2xl text-sm text-muted">
-              Track permit volume, contractor activity, lead progression, and area
-              trends from the live permits dataset.
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-sand">
+              Track permit volume, contractor activity, lead progression, and area trends.
             </p>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-            <div className="stat-card">
-              <p className="section-label">Analytics</p>
-              <p className="mt-1 text-xl font-semibold text-white">Live</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
+            <div className="card-accent px-5 py-3">
+              <p className="label-stencil">Status</p>
+              <p className="mt-1 font-display text-2xl text-teal">LIVE</p>
             </div>
             <SignOutButton />
           </div>
         </div>
-        <DashboardNav
-          currentPath="/dashboard/analytics"
-          showSetupWarning={!companyContext}
-        />
-      </div>
+        <div className="mt-6 border-t border-stroke pt-4">
+          <DashboardNav currentPath="/dashboard/analytics" showSetupWarning={!companyContext} />
+        </div>
+      </header>
 
       <AnalyticsDashboard />
     </main>
