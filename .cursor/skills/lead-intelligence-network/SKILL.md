@@ -1,89 +1,75 @@
 # Lead Intelligence Network — Multi-Agent System
 
 ## Overview
-A multi-agent lead intelligence system for the JZ Demo Leads portal that enriches demolition permit data with ecosystem context, contractor profiling, close probability scoring, and property owner research.
+A multi-agent lead intelligence system for the JZ Demo Leads portal. All agents run through a single cron job to stay within Vercel Hobby plan limits (1 cron/day).
 
 ## Architecture
 
+### Single Cron Pipeline
+One cron job at `/api/cron/sync-permits` (daily 8 AM UTC) chains everything:
+
+1. Sync permits from ArcGIS
+2. Run 4 agents in sequence on up to 10 unenriched permits
+3. Return summary
+
 ### Agent Pipeline
-Four specialized agents run in sequence via an orchestrator:
 
-1. **Permit Enrichment Agent** (`lib/agents/permit-enrichment-agent.ts`)
-   - Queries Miami-Dade ArcGIS for all permits at the same address/folio
-   - Writes to `permit_ecosystem` table
-   - Provides "activity density" signal for scoring
+**Agent 1: Permit Enrichment** (`lib/agents/permit-enrichment-agent.ts`)
+- `runPermitEnrichment(permits)` — queries ArcGIS by folio for all permits at same property
+- Extracts: trade types, subcontractors, primary GC, activity score (0-100)
+- Writes to `permit_ecosystem` table (one row per permit, upsert on permit_id)
 
-2. **GC Profiler Agent** (`lib/agents/gc-profiler-agent.ts`)
-   - Aggregates all permits by contractor name across Miami-Dade
-   - Calculates total jobs, demo jobs, average value, active years
-   - Writes to `gc_profiles` table
-   - Identifies repeat players and big-budget GCs
+**Agent 2: Developer Lookup** (`lib/agents/developer-lookup-agent.ts`)
+- `runDeveloperLookup(permits)` — queries Miami-Dade Property Appraiser API by folio
+- Classifies owner as corporate/individual
+- Optional Tavily web research for corporate owners
+- Writes to `property_owners` table (upsert on folio)
 
-3. **Close Probability Agent** (`lib/agents/close-probability-agent.ts`)
-   - Scores each permit 0-100 using weighted algorithm:
-     - 40pts: permit_ecosystem activity density
-     - 30pts: GC profile strength (repeat demo GC)
-     - 20pts: estimated value tier
-     - 10pts: property owner type (developer vs individual)
-   - Updates `permits.close_probability` and `permits.close_factors` JSONB
+**Agent 3: GC Profiler** (`lib/agents/gc-profiler-agent.ts`)
+- `runGCProfiler(permits)` — reads primary_gc from permit_ecosystem, queries ArcGIS for all their permits in last 12 months
+- Calculates: total permits, active in 90d, avg value, demo frequency, trade types, geo focus
+- Writes to `gc_profiles` table (upsert on contractor_name)
 
-4. **Developer Lookup Agent** (`lib/agents/developer-lookup-agent.ts`)
-   - Queries Miami-Dade Property Appraiser API by folio number
-   - Optional Tavily web search for company research
-   - Writes to `property_owners` table
-
-### Orchestrator (`lib/agents/lead-intelligence-orchestrator.ts`)
-- Runs all 4 agents in sequence for a batch of permits
-- Default batch size: 10 permits
-- Returns summary of enriched/failed/skipped counts
-- Integrated into the daily cron sync at `/api/cron/sync-permits`
+**Agent 4: Close Probability** (`lib/agents/close-probability-agent.ts`)
+- `runCloseProbability(permits)` — scores each permit 0-100:
+  - Activity signals (40pts): related_permit_count + recency
+  - GC signals (30pts): active_permits_90d
+  - Value signals (20pts): estimated_value tier
+  - Property signals (10pts): commercial flag
+  - Bonus (5pts): high-value area (Brickell, Miami Beach, etc.)
+- Labels: Hot (>=70), Warm (>=40), Low (<40)
+- Updates `permits.close_probability_score` and `permits.close_probability_label`
 
 ## Database Tables
 
 ### permit_ecosystem
-Stores related permits found at the same address/folio.
-- `id`, `permit_id` (FK), `related_permit_number`, `related_description`, `related_value`, `related_date`, `relationship_type` (same_address | same_folio | same_owner), `created_at`
+- `permit_id` (unique FK), `folio`, `related_permit_count`, `trade_types` (text[]), `sub_contractors` (text[]), `primary_gc`, `activity_score`
 
 ### gc_profiles
-Aggregated contractor intelligence.
-- `id`, `contractor_name` (unique), `total_jobs`, `demo_jobs`, `total_value`, `avg_value`, `first_seen`, `last_seen`, `top_addresses` (JSONB), `updated_at`
+- `contractor_name` (unique), `total_permits_12mo`, `active_permits_90d`, `avg_project_value`, `primary_trades` (text[]), `geo_focus` (text[]), `demo_frequency`
 
 ### property_owners
-Property owner research results.
-- `id`, `folio_number` (unique), `owner_name`, `owner_type` (individual | corporation | llc | trust | government), `mailing_address`, `assessed_value`, `land_use`, `research_notes`, `source`, `updated_at`
+- `folio` (unique), `owner_name`, `owner_type` (corporate/individual), `mailing_address`, `company_research` (jsonb)
 
-### permits table additions
-- `close_probability` (integer 0-100, nullable)
-- `close_factors` (JSONB, nullable) — breakdown of scoring components
-- `enriched_at` (timestamptz, nullable) — when intelligence pipeline last ran
+### permits additions
+- `close_probability_score` (int, default 0)
+- `close_probability_label` (text, default 'Low')
 
 ## API Routes
+- `POST /api/agents/enrich` — enrich single permit (runs all 4 agents)
+- `POST /api/agents/enrich-batch` — enrich up to 10 permits
+- `POST /api/agents/score` — recalculate close probability
+- `GET /api/agents/gc-profile/[name]` — get/refresh GC profile
 
-- `POST /api/agents/enrich` — Enrich a single permit by ID
-- `POST /api/agents/enrich-batch` — Enrich up to 10 permits
-- `POST /api/agents/score` — Recalculate close probability for a permit
-- `GET /api/agents/gc-profile/[name]` — Get or refresh a GC profile
+All require `Authorization: Bearer <CRON_SECRET>`.
 
-## UI Integration
-
-### Permits Table
-- Close probability badge column (color-coded 0-100)
-- GC total jobs count column
-
-### Permit Detail Page
-- Permit Ecosystem section (related permits timeline)
-- GC Profile card (stats + top addresses)
-- Property Owner card (owner info + assessed value)
-- "Why This Lead" section (close probability breakdown)
-
-### Intelligence Dashboard (`/dashboard/intelligence`)
-- Top GCs by demo job count
-- Most active properties by permit density
-- Developer watch list from property_owners
-
-## Environment Variables
-- `TAVILY_API_KEY` — Optional, for developer research web search
-- All existing env vars (Supabase, CRON_SECRET) are reused
+## Portability
+To reuse this pattern for another business:
+1. Swap the ArcGIS data source for your industry's permit/listing API
+2. Adjust scoring weights in close-probability-agent.ts
+3. Replace Property Appraiser lookup with your owner/entity API
+4. Update trade type classifications for your domain
 
 ## Design System
-Uses existing industrial design tokens: `#0C0A09` bg, `#1C1917` cards, `#FF5E00` accent, Bebas Neue display font, Outfit body font, hazard stripe accents.
+Colors: #0C0A09 bg, #1C1917 cards, #FF5E00 accent, #C0C0C0 text
+Fonts: Bebas Neue (display), Outfit (body)

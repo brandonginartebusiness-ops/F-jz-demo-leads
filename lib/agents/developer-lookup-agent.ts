@@ -1,148 +1,91 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { PermitRecord } from "@/lib/types";
 
-type OwnerType = "individual" | "corporation" | "llc" | "trust" | "government";
-
-export type PropertyOwnerResult = {
-  folio_number: string;
-  owner_name: string | null;
-  owner_type: OwnerType;
-  mailing_address: string | null;
-  assessed_value: number | null;
-  land_use: string | null;
-  research_notes: string | null;
-  source: string;
+type ParcelInfo = {
+  ownership?: {
+    name?: string;
+    address?: string;
+  };
 };
 
 type PropertyAppraiserResponse = {
-  PropertyInfo?: {
-    Owner1?: string;
-    MailingAddress?: string;
-    LandUse?: string;
-    AssessedValue?: string | number;
+  parcelInfos?: {
+    parcelInfo?: ParcelInfo[];
   };
 };
 
-const CORP_INDICATORS = ["INC", "CORP", "CORPORATION", "CO.", "COMPANY", "GROUP", "HOLDINGS", "ENTERPRISES"];
-const LLC_INDICATORS = ["LLC", "L.L.C.", "LIMITED LIABILITY"];
-const TRUST_INDICATORS = ["TRUST", "TRUSTEE", "TR"];
-const GOVT_INDICATORS = ["COUNTY", "CITY OF", "STATE OF", "MIAMI-DADE", "SCHOOL BOARD", "GOVERNMENT"];
+const CORP_INDICATORS = ["LLC", "INC", "CORP", "GROUP", "HOLDINGS", "ENTERPRISES", "L.L.C.", "COMPANY"];
 
-function classifyOwner(name: string | null | undefined): OwnerType {
-  if (!name) return "individual";
+function isCorporateOwner(name: string | null | undefined): boolean {
+  if (!name) return false;
   const upper = name.toUpperCase();
-
-  if (GOVT_INDICATORS.some((g) => upper.includes(g))) return "government";
-  if (LLC_INDICATORS.some((g) => upper.includes(g))) return "llc";
-  if (TRUST_INDICATORS.some((g) => upper.includes(g))) return "trust";
-  if (CORP_INDICATORS.some((g) => upper.includes(g))) return "corporation";
-  return "individual";
+  return CORP_INDICATORS.some((ind) => upper.includes(ind));
 }
 
-function parseAssessedValue(val: string | number | null | undefined): number | null {
-  if (val === null || val === undefined) return null;
-  const num = typeof val === "number" ? val : parseFloat(String(val).replace(/[,$]/g, ""));
-  return Number.isNaN(num) ? null : num;
-}
-
-async function fetchPropertyAppraiser(folioNumber: string): Promise<PropertyAppraiserResponse | null> {
-  try {
-    const url = `https://www.miamidade.gov/Apps/PA/PApublicServicesgis/PaaborSearchByFolio.aspx?folioNumber=${encodeURIComponent(folioNumber)}`;
-    const response = await fetch(url, {
-      headers: { Accept: "application/json" },
-      next: { revalidate: 0 },
-    });
-
-    if (!response.ok) return null;
-
-    const text = await response.text();
-    try {
-      return JSON.parse(text) as PropertyAppraiserResponse;
-    } catch {
-      return null;
-    }
-  } catch {
-    return null;
-  }
-}
-
-async function tavilyResearch(query: string): Promise<string | null> {
-  const apiKey = process.env.TAVILY_API_KEY;
-  if (!apiKey) return null;
-
-  try {
-    const response = await fetch("https://api.tavily.com/search", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        api_key: apiKey,
-        query,
-        search_depth: "basic",
-        max_results: 3,
-        include_answer: true,
-      }),
-    });
-
-    if (!response.ok) return null;
-
-    const data = (await response.json()) as { answer?: string };
-    return data.answer ?? null;
-  } catch {
-    return null;
-  }
-}
-
-export async function lookupPropertyOwner(
-  folioNumber: string,
-  ownerNameHint?: string | null,
-): Promise<PropertyOwnerResult> {
-  // Try the property appraiser API
-  const paData = await fetchPropertyAppraiser(folioNumber);
-  const info = paData?.PropertyInfo;
-
-  const ownerName = info?.Owner1 ?? ownerNameHint ?? null;
-  const ownerType = classifyOwner(ownerName);
-
-  // If owner looks like a company, try web research
-  let researchNotes: string | null = null;
-  if (ownerName && ownerType !== "individual" && ownerType !== "government") {
-    researchNotes = await tavilyResearch(
-      `${ownerName} Miami Florida real estate developer property`,
-    );
-  }
-
-  return {
-    folio_number: folioNumber,
-    owner_name: ownerName,
-    owner_type: ownerType,
-    mailing_address: info?.MailingAddress ?? null,
-    assessed_value: parseAssessedValue(info?.AssessedValue),
-    land_use: info?.LandUse ?? null,
-    research_notes: researchNotes,
-    source: info ? "miami_dade_pa" : "permit_data",
-  };
-}
-
-export async function upsertPropertyOwner(
-  folioNumber: string,
-  ownerNameHint?: string | null,
-): Promise<PropertyOwnerResult> {
+export async function runDeveloperLookup(permits: PermitRecord[]) {
   const admin = createAdminClient();
-  const result = await lookupPropertyOwner(folioNumber, ownerNameHint);
 
-  await admin.from("property_owners").upsert(
-    {
-      folio_number: result.folio_number,
-      owner_name: result.owner_name,
-      owner_type: result.owner_type,
-      mailing_address: result.mailing_address,
-      assessed_value: result.assessed_value,
-      land_use: result.land_use,
-      research_notes: result.research_notes,
-      source: result.source,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "folio_number", ignoreDuplicates: false },
-  );
+  for (const permit of permits) {
+    if (!permit.folio_number) continue;
 
-  return result;
+    try {
+      const paResponse = await fetch(
+        `https://www.miamidade.gov/Apps/PA/PApublicServiceProxy/PaDataDetailService.aspx?folioNumber=${encodeURIComponent(permit.folio_number)}&operation=GetPropertyParcelInfo`,
+        { headers: { Accept: "application/json" }, next: { revalidate: 0 } },
+      );
+
+      if (!paResponse.ok) continue;
+
+      const text = await paResponse.text();
+      let ownerData: PropertyAppraiserResponse | null = null;
+      try {
+        ownerData = JSON.parse(text) as PropertyAppraiserResponse;
+      } catch {
+        continue;
+      }
+
+      const parcel = ownerData?.parcelInfos?.parcelInfo?.[0];
+      const ownerName = parcel?.ownership?.name ?? null;
+      const ownerAddress = parcel?.ownership?.address ?? null;
+      const isCorp = isCorporateOwner(ownerName);
+
+      // If corporate owner, research with Tavily
+      let companyResearch: unknown = null;
+      if (isCorp && process.env.TAVILY_API_KEY) {
+        try {
+          const research = await fetch("https://api.tavily.com/search", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              api_key: process.env.TAVILY_API_KEY,
+              query: `${ownerName} Miami real estate development projects`,
+              search_depth: "basic",
+              max_results: 3,
+            }),
+          });
+
+          if (research.ok) {
+            const resData = (await research.json()) as { results?: unknown };
+            companyResearch = resData?.results ?? null;
+          }
+        } catch {
+          // Non-fatal
+        }
+      }
+
+      await admin.from("property_owners").upsert(
+        {
+          folio: permit.folio_number,
+          owner_name: ownerName,
+          owner_type: isCorp ? "corporate" : "individual",
+          mailing_address: ownerAddress,
+          company_research: companyResearch,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "folio" },
+      );
+    } catch {
+      // Non-fatal: continue to next permit
+    }
+  }
 }

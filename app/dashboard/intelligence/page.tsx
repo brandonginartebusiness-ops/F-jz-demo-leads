@@ -12,11 +12,6 @@ function formatCurrency(val: number | null) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(val);
 }
 
-function formatDate(val: string | null) {
-  if (!val) return "—";
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(val));
-}
-
 export default async function IntelligencePage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -61,10 +56,10 @@ export default async function IntelligencePage() {
       </header>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Top GCs */}
+        {/* Top GCs to Target */}
         <section className="card p-6 animate-enter delay-1">
-          <h2 className="font-display text-xl text-sand-bright">TOP GENERAL CONTRACTORS</h2>
-          <p className="mt-1 text-sm text-sand">Ranked by demolition job count across Miami-Dade.</p>
+          <h2 className="font-display text-xl text-sand-bright">TOP GCS TO TARGET</h2>
+          <p className="mt-1 text-sm text-sand">Ranked by active permits in last 90 days.</p>
 
           {topGcs.length === 0 ? (
             <div className="mt-6 rounded-lg border border-dashed border-stroke p-8 text-center">
@@ -81,13 +76,12 @@ export default async function IntelligencePage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-sand-bright">{gc.contractor_name}</p>
                     <p className="text-xs text-sand">
-                      {gc.demo_jobs} demo / {gc.total_jobs} total &middot; Avg {formatCurrency(gc.avg_value)}
+                      {gc.active_permits_90d} active &middot; {gc.total_permits_12mo} total &middot; {gc.demo_frequency} demo
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-mono text-xs text-sand/60">
-                      {formatDate(gc.first_seen)} — {formatDate(gc.last_seen)}
-                    </p>
+                    <p className="font-mono text-xs text-sand-bright">{formatCurrency(gc.avg_project_value)}</p>
+                    <p className="font-mono text-[10px] text-sand/50">avg value</p>
                   </div>
                 </div>
               ))}
@@ -98,7 +92,7 @@ export default async function IntelligencePage() {
         {/* Developer Watch List */}
         <section className="card p-6 animate-enter delay-2">
           <h2 className="font-display text-xl text-sand-bright">DEVELOPER WATCH LIST</h2>
-          <p className="mt-1 text-sm text-sand">Corporate, LLC, and trust property owners sorted by assessed value.</p>
+          <p className="mt-1 text-sm text-sand">Corporate owners with 2+ permits.</p>
 
           {developers.length === 0 ? (
             <div className="mt-6 rounded-lg border border-dashed border-stroke p-8 text-center">
@@ -116,19 +110,13 @@ export default async function IntelligencePage() {
                         <span className="rounded bg-accent/10 px-1.5 py-0.5 font-mono text-[10px] uppercase text-accent">
                           {owner.owner_type}
                         </span>
-                        {" "}&middot; Folio {owner.folio_number}
+                        {" "}&middot; Folio {owner.folio}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-mono text-sm text-sand-bright">{formatCurrency(owner.assessed_value)}</p>
-                      <p className="text-xs text-sand/50">{owner.land_use || "—"}</p>
-                    </div>
+                    {owner.mailing_address ? (
+                      <p className="shrink-0 text-xs text-sand/50">{owner.mailing_address}</p>
+                    ) : null}
                   </div>
-                  {owner.research_notes ? (
-                    <p className="mt-2 rounded bg-bg-raised p-2 text-xs leading-relaxed text-sand/70">
-                      {owner.research_notes}
-                    </p>
-                  ) : null}
                 </div>
               ))}
             </div>
@@ -138,7 +126,7 @@ export default async function IntelligencePage() {
         {/* Most Active Properties */}
         <section className="card p-6 animate-enter delay-3 lg:col-span-2">
           <h2 className="font-display text-xl text-sand-bright">MOST ACTIVE PROPERTIES</h2>
-          <p className="mt-1 text-sm text-sand">Properties with the highest number of related permits — signals major development activity.</p>
+          <p className="mt-1 text-sm text-sand">Properties with the highest trade count — signals major development activity.</p>
 
           {activeProperties.length === 0 ? (
             <div className="mt-6 rounded-lg border border-dashed border-stroke p-8 text-center">
@@ -158,21 +146,22 @@ export default async function IntelligencePage() {
                       {(item.permit as { property_address?: string })?.property_address || "Unknown"}
                     </p>
                     <span className="shrink-0 rounded bg-accent/15 px-2 py-0.5 font-mono text-xs font-semibold text-accent">
-                      {item.relatedCount} related
+                      {item.relatedCount} trades
                     </span>
                   </div>
                   <p className="mt-1 font-mono text-xs text-sand/50">
-                    {(item.permit as { permit_number?: string })?.permit_number || "—"}
+                    {(item.permit as { owner_name?: string })?.owner_name || "—"}
                   </p>
                   <div className="mt-2 flex items-center gap-3">
                     <span className="font-mono text-sm text-sand">
                       {formatCurrency((item.permit as { estimated_value?: number })?.estimated_value ?? null)}
                     </span>
-                    {(item.permit as { close_probability?: number })?.close_probability != null ? (
-                      <span className="font-mono text-xs text-teal">
-                        {(item.permit as { close_probability: number }).close_probability}% close
-                      </span>
-                    ) : null}
+                    {(() => {
+                      const p = item.permit as { close_probability_score?: number; close_probability_label?: string } | null;
+                      if (!p?.close_probability_score) return null;
+                      const color = p.close_probability_label === "Hot" ? "text-accent" : p.close_probability_label === "Warm" ? "text-amber" : "text-sand";
+                      return <span className={`font-mono text-xs ${color}`}>{p.close_probability_label}</span>;
+                    })()}
                   </div>
                 </Link>
               ))}

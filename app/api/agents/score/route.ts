@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getServerEnv } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { PermitRecord } from "@/lib/types";
-import { scoreAndUpdatePermit } from "@/lib/agents/close-probability-agent";
+import { runCloseProbability } from "@/lib/agents/close-probability-agent";
+import type { PermitRecord } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -35,8 +35,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Permit not found" }, { status: 404 });
     }
 
-    const factors = await scoreAndUpdatePermit(data as PermitRecord);
-    return NextResponse.json({ success: true, factors });
+    await runCloseProbability([data as PermitRecord]);
+    return NextResponse.json({ success: true, permitId: body.permitId });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Scoring failed";
     return NextResponse.json({ success: false, error: message }, { status: 500 });

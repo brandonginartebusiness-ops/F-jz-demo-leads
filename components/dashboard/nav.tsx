@@ -17,7 +17,7 @@ const links = [
   { label: "ICP Builder", href: "/dashboard/icp" },
   { label: "Activity", href: "/dashboard/activity" },
   { label: "Analytics", href: "/dashboard/analytics" },
-  { label: "Intelligence", href: "/dashboard/intelligence" },
+  { label: "Intel", href: "/dashboard/intelligence" },
 ] as const;
 
 export function DashboardNav({

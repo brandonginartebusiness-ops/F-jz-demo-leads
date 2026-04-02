@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getServerEnv } from "@/lib/env";
-import { enrichSinglePermit } from "@/lib/agents/lead-intelligence-orchestrator";
+import { runPermitEnrichment } from "@/lib/agents/permit-enrichment-agent";
+import { runDeveloperLookup } from "@/lib/agents/developer-lookup-agent";
+import { runGCProfiler } from "@/lib/agents/gc-profiler-agent";
+import { runCloseProbability } from "@/lib/agents/close-probability-agent";
+import { createAdminClient } from "@/lib/supabase/admin";
+import type { PermitRecord } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -23,8 +28,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "permitId is required" }, { status: 400 });
     }
 
-    const result = await enrichSinglePermit(body.permitId);
-    return NextResponse.json({ success: true, ...result });
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("permits")
+      .select("*")
+      .eq("id", body.permitId)
+      .single();
+
+    if (error || !data) {
+      return NextResponse.json({ error: "Permit not found" }, { status: 404 });
+    }
+
+    const permits = [data as PermitRecord];
+    await runPermitEnrichment(permits);
+    await runDeveloperLookup(permits);
+    await runGCProfiler(permits);
+    await runCloseProbability(permits);
+
+    return NextResponse.json({ success: true, permitId: body.permitId });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Enrichment failed";
     return NextResponse.json({ success: false, error: message }, { status: 500 });

@@ -1,138 +1,78 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { PermitRecord } from "@/lib/types";
+import type { PermitRecord } from "@/lib/types";
 
 const ARCGIS_ENDPOINT =
   "https://services.arcgis.com/8Pc9XBTAsYuxx9Ny/ArcGIS/rest/services/miamidade_permit_data/FeatureServer/0/query";
 
-type ArcGisRelatedFeature = {
+type ArcGisFeature = {
   attributes: {
     PermitNumber?: string;
-    DetailDescriptionComments?: string;
-    EstimatedValue?: number | string;
+    PermitType?: string;
+    ContractorName?: string;
     PermitIssuedDate?: string;
-    PropertyAddress?: string;
-    FolioNumber?: string;
-    OwnerName?: string;
+    DetailDescriptionComments?: string;
   };
 };
 
 type ArcGisResponse = {
-  features?: ArcGisRelatedFeature[];
+  features?: ArcGisFeature[];
 };
 
-type EnrichmentResult = {
-  permitId: string;
-  relatedCount: number;
-  error?: string;
-};
-
-async function queryRelatedPermits(
-  field: string,
-  value: string,
-  excludePermitNumber: string,
-): Promise<ArcGisRelatedFeature[]> {
-  const where = `${field}='${value.replace(/'/g, "''")}'  AND PermitNumber<>'${excludePermitNumber.replace(/'/g, "''")}'`;
-  const params = new URLSearchParams({
-    where,
-    outFields: "PermitNumber,DetailDescriptionComments,EstimatedValue,PermitIssuedDate,PropertyAddress,FolioNumber,OwnerName",
-    f: "json",
-    returnGeometry: "false",
-    resultRecordCount: "50",
-    orderByFields: "PermitIssuedDate DESC",
-  });
-
-  const response = await fetch(`${ARCGIS_ENDPOINT}?${params.toString()}`, {
-    headers: { Accept: "application/json" },
-    next: { revalidate: 0 },
-  });
-
-  if (!response.ok) return [];
-
-  const data = (await response.json()) as ArcGisResponse;
-  return data.features ?? [];
-}
-
-function parseValue(val: string | number | null | undefined): number | null {
-  if (val === null || val === undefined) return null;
-  const num = typeof val === "number" ? val : parseFloat(String(val));
-  return Number.isNaN(num) ? null : num;
-}
-
-function parseDate(val: string | null | undefined): string | null {
-  if (!val) return null;
-  const d = new Date(val);
-  return Number.isNaN(d.getTime()) ? null : d.toISOString().split("T")[0];
-}
-
-export async function enrichPermitEcosystem(permit: PermitRecord): Promise<EnrichmentResult> {
+export async function runPermitEnrichment(permits: PermitRecord[]) {
   const admin = createAdminClient();
-  const related: Array<{
-    permit_id: string;
-    related_permit_number: string;
-    related_description: string | null;
-    related_value: number | null;
-    related_date: string | null;
-    relationship_type: string;
-  }> = [];
 
-  try {
-    // Query by address
-    if (permit.property_address) {
-      const addressResults = await queryRelatedPermits(
-        "PropertyAddress",
-        permit.property_address,
-        permit.permit_number,
-      );
-      for (const f of addressResults) {
-        if (f.attributes.PermitNumber) {
-          related.push({
-            permit_id: permit.id,
-            related_permit_number: f.attributes.PermitNumber,
-            related_description: f.attributes.DetailDescriptionComments ?? null,
-            related_value: parseValue(f.attributes.EstimatedValue),
-            related_date: parseDate(f.attributes.PermitIssuedDate),
-            relationship_type: "same_address",
-          });
-        }
-      }
-    }
+  for (const permit of permits) {
+    if (!permit.folio_number) continue;
 
-    // Query by folio
-    if (permit.folio_number) {
-      const folioResults = await queryRelatedPermits(
-        "FolioNumber",
-        permit.folio_number,
-        permit.permit_number,
-      );
-      for (const f of folioResults) {
-        const permitNum = f.attributes.PermitNumber;
-        if (permitNum && !related.some((r) => r.related_permit_number === permitNum)) {
-          related.push({
-            permit_id: permit.id,
-            related_permit_number: permitNum,
-            related_description: f.attributes.DetailDescriptionComments ?? null,
-            related_value: parseValue(f.attributes.EstimatedValue),
-            related_date: parseDate(f.attributes.PermitIssuedDate),
-            relationship_type: "same_folio",
-          });
-        }
-      }
-    }
-
-    if (related.length > 0) {
-      const { error } = await admin.from("permit_ecosystem").upsert(related, {
-        onConflict: "permit_id,related_permit_number",
-        ignoreDuplicates: false,
+    try {
+      const where = `FolioNumber='${permit.folio_number.replace(/'/g, "''")}'`;
+      const params = new URLSearchParams({
+        where,
+        outFields: "PermitNumber,PermitType,ContractorName,PermitIssuedDate,DetailDescriptionComments",
+        f: "json",
+        returnGeometry: "false",
+        resultRecordCount: "200",
+        orderByFields: "PermitIssuedDate DESC",
       });
-      if (error) throw error;
-    }
 
-    return { permitId: permit.id, relatedCount: related.length };
-  } catch (err) {
-    return {
-      permitId: permit.id,
-      relatedCount: 0,
-      error: err instanceof Error ? err.message : "Unknown error",
-    };
+      const response = await fetch(`${ARCGIS_ENDPOINT}?${params.toString()}`, {
+        headers: { Accept: "application/json" },
+        next: { revalidate: 0 },
+      });
+
+      if (!response.ok) continue;
+
+      const data = (await response.json()) as ArcGisResponse;
+      const trades = (data.features ?? []).map((f) => f.attributes);
+
+      const tradeTypes = Array.from(new Set(trades.map((t) => t.PermitType?.trim()).filter(Boolean))) as string[];
+      const contractors = Array.from(new Set(trades.map((t) => t.ContractorName?.trim()).filter(Boolean))) as string[];
+      const activityScore = Math.min(trades.length * 10, 100);
+
+      // Find primary GC: most recent BLDG permit contractor
+      const primaryGC = trades
+        .filter((t) => t.PermitType === "BLDG")
+        .sort((a, b) => {
+          const da = a.PermitIssuedDate ? new Date(a.PermitIssuedDate).getTime() : 0;
+          const db = b.PermitIssuedDate ? new Date(b.PermitIssuedDate).getTime() : 0;
+          return db - da;
+        })[0]?.ContractorName?.trim() ?? null;
+
+      await admin.from("permit_ecosystem").upsert(
+        {
+          permit_id: permit.id,
+          folio: permit.folio_number,
+          related_permit_count: trades.length,
+          trade_types: tradeTypes,
+          sub_contractors: contractors,
+          primary_gc: primaryGC,
+          activity_score: activityScore,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "permit_id" },
+      );
+    } catch {
+      // Non-fatal: continue to next permit
+    }
   }
 }

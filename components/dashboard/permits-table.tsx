@@ -46,7 +46,7 @@ function getSortValue(permit: PermitRecord, key: SortKey): string | number {
     case "sqft": return permit.square_footage ?? 0;
     case "floors": return permit.structure_floors ?? 0;
     case "priority": return permit.priority_score ?? 0;
-    case "close": return permit.close_probability ?? 0;
+    case "close": return permit.close_probability_score ?? 0;
   }
 }
 
@@ -130,7 +130,7 @@ export function PermitsTable({ permits }: Props) {
               <span className="font-mono text-sm text-sand">
                 {formatEstimatedValue(permit.estimated_value)}
               </span>
-              <CloseBadge probability={permit.close_probability} />
+              <CloseBadge probability={permit.close_probability_score} />
             </div>
           </Link>
         ))}
@@ -197,7 +197,7 @@ export function PermitsTable({ permits }: Props) {
                     <PriorityBadge score={permit.priority_score} />
                   </td>
                   <td className="px-4 py-3.5">
-                    <CloseBadge probability={permit.close_probability} />
+                    <CloseBadge probability={permit.close_probability_score} />
                   </td>
                   <td className="px-4 py-3.5">
                     <span className="rounded border border-stroke bg-bg-soft px-2.5 py-1 text-xs font-medium capitalize text-sand">
