@@ -53,22 +53,22 @@ export default async function ActivityPage({ searchParams }: Props) {
   const entries = await listActivityFeed(actionType);
 
   return (
-    <main className="mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mb-8 flex flex-col gap-6 rounded-3xl bg-[#1a1a1a] p-6">
+    <main id="main-content" className="mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mb-8 flex flex-col gap-6 rounded-3xl bg-panel p-6 animate-fade-in">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-[#C0C0C0]">
+            <p className="page-label">
               Activity feed
             </p>
             <h1 className="mt-3 text-3xl font-semibold text-white">All lead activity</h1>
-            <p className="mt-3 max-w-2xl text-sm text-[#888888]">
+            <p className="mt-3 max-w-2xl text-sm text-muted">
               Review the latest status updates, notes, and new permit sync events across
               the pipeline.
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">Entries</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <div className="stat-card">
+              <p className="section-label">Entries</p>
               <p className="mt-1 text-xl font-semibold text-white">{entries.length}</p>
             </div>
             <SignOutButton />
@@ -78,7 +78,7 @@ export default async function ActivityPage({ searchParams }: Props) {
       </div>
 
       <section className="space-y-5">
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3" role="group" aria-label="Activity type filters">
           {FILTERS.map((filter) => {
             const isActive = actionType === filter.value || (!actionType && !filter.value);
 
@@ -87,8 +87,8 @@ export default async function ActivityPage({ searchParams }: Props) {
                 key={filter.href}
                 className={`inline-flex items-center rounded-xl border px-4 py-2 text-sm font-medium transition ${
                   isActive
-                    ? "border-[#FF6B00] bg-[#FF6B00]/12 text-[#FF6B00]"
-                    : "border-[#FF6B00]/25 bg-[#1a1a1a] text-[#C0C0C0] hover:border-[#FF6B00]"
+                    ? "border-accent bg-accent-muted text-accent"
+                    : "border-border bg-panel text-silver hover:border-accent"
                 }`}
                 href={filter.href}
               >

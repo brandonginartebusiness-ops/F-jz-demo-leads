@@ -88,11 +88,11 @@ export function getLeadTypeStyles(leadType: LeadType | string | null | undefined
     case "partial_demolition":
       return "bg-[#facc15]/15 text-[#fde68a]";
     case "demo_related":
-      return "bg-[#888888]/15 text-[#C0C0C0]";
+      return "bg-muted/15 text-silver";
     case "junk":
       return "bg-[#ef4444]/15 text-[#fca5a5]";
     default:
-      return "bg-[#525252]/15 text-[#C0C0C0]";
+      return "bg-[#525252]/15 text-silver";
   }
 }
 

@@ -23,23 +23,24 @@ export function DashboardNav({
   showSetupWarning,
 }: DashboardNavProps) {
   return (
-    <nav className="flex flex-wrap gap-3">
+    <nav aria-label="Dashboard navigation" className="flex flex-wrap gap-3">
       {links.map((link) => {
         const isActive = currentPath === link.href;
 
         return (
           <Link
             key={link.href}
+            aria-current={isActive ? "page" : undefined}
             className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition ${
               isActive
-                ? "border-[#FF6B00] bg-[#FF6B00]/12 text-[#FF6B00]"
-                : "border-[#FF6B00]/25 bg-[#1a1a1a] text-[#C0C0C0] hover:border-[#FF6B00]"
+                ? "border-accent bg-accent-muted text-accent"
+                : "border-border bg-panel text-silver hover:border-accent"
             }`}
             href={link.href}
           >
             <span>{link.label}</span>
             {link.href === "/dashboard/setup" && showSetupWarning ? (
-              <span className="h-2.5 w-2.5 rounded-full bg-[#FF8C00]" />
+              <span aria-label="Needs setup" className="h-2.5 w-2.5 rounded-full bg-accent-hover" />
             ) : null}
           </Link>
         );

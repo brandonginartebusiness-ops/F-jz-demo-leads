@@ -110,21 +110,28 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
   }
 
   return (
-    <div className="space-y-6 rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
+    <div className="space-y-6 panel-lg p-6">
       <div>
-        <div className="mb-4 h-2 overflow-hidden rounded-full bg-[#262626]">
+        <div
+          aria-label="Setup progress"
+          aria-valuemax={3}
+          aria-valuemin={1}
+          aria-valuenow={step}
+          className="mb-4 h-2 overflow-hidden rounded-full bg-[#262626]"
+          role="progressbar"
+        >
           <div
-            className="h-full rounded-full bg-[#FF6B00] transition-all"
+            className="h-full rounded-full bg-accent transition-all"
             style={{ width: `${(step / 3) * 100}%` }}
           />
         </div>
-        <p className="text-sm uppercase tracking-[0.3em] text-[#C0C0C0]">
+        <p className="page-label">
           Step {step} of 3
         </p>
       </div>
 
       {step === 1 ? (
-        <div className="space-y-5">
+        <div className="space-y-5 animate-fade-in">
           <div>
             <label
               className="mb-2 block text-sm font-medium text-white"
@@ -133,7 +140,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
               Company name
             </label>
             <input
-              className="w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
+              className="input-base"
               id="company-name"
               onChange={(event) => updateField("company_name", event.target.value)}
               value={form.company_name}
@@ -152,7 +159,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
               Offering
             </label>
             <textarea
-              className="min-h-36 w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
+              className="input-base min-h-36"
               id="offering"
               onChange={(event) => updateField("offering", event.target.value)}
               placeholder="Commercial demolition, selective interior demo, structural tear-outs, and site clearing."
@@ -163,7 +170,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
       ) : null}
 
       {step === 2 ? (
-        <div className="space-y-5">
+        <div className="space-y-5 animate-fade-in">
           <div>
             <label
               className="mb-2 block text-sm font-medium text-white"
@@ -172,7 +179,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
               Value proposition
             </label>
             <textarea
-              className="min-h-36 w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
+              className="input-base min-h-36"
               id="value-prop"
               onChange={(event) => updateField("value_prop", event.target.value)}
               placeholder="We help owners and GCs move quickly through demolition scopes with fast estimating and safe field execution."
@@ -188,7 +195,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
               Differentiators
             </label>
             <textarea
-              className="min-h-36 w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
+              className="input-base min-h-36"
               id="differentiators"
               onChange={(event) => updateField("differentiators", event.target.value)}
               placeholder="Union-ready crews, quick mobilization, clear scopes, and responsive preconstruction support."
@@ -204,7 +211,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
               Target market
             </label>
             <textarea
-              className="min-h-28 w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
+              className="input-base min-h-28"
               id="target-market"
               onChange={(event) => updateField("target_market", event.target.value)}
               placeholder="Commercial property owners, healthcare facilities, retail redevelopments, and tenant improvement teams."
@@ -220,7 +227,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
               Average project size
             </label>
             <select
-              className="w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
+              className="input-base"
               id="avg-project-size"
               onChange={(event) =>
                 updateField(
@@ -231,7 +238,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
               value={form.avg_project_size}
             >
               {PROJECT_SIZE_OPTIONS.map((option) => (
-                <option key={option} className="text-black" value={option}>
+                <option key={option} value={option}>
                   {option}
                 </option>
               ))}
@@ -241,7 +248,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
       ) : null}
 
       {step === 3 ? (
-        <div className="space-y-5">
+        <div className="space-y-5 animate-fade-in">
           <div>
             <p className="mb-3 text-sm font-medium text-white">Tone</p>
             <div className="grid gap-3 md:grid-cols-2">
@@ -253,22 +260,22 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
                     key={option}
                     className={`rounded-2xl border p-4 text-left transition ${
                       selected
-                        ? "border-[#FF6B00] bg-[#FF6B00]/10"
-                        : "border-[#FF6B00]/25 bg-[#1a1a1a] hover:border-[#FF6B00]"
+                        ? "border-accent bg-accent/10"
+                        : "border-border bg-panel hover:border-accent"
                     }`}
                     onClick={() => updateField("tone", option)}
                     type="button"
                   >
                     <p className="font-medium text-white">{option}</p>
-                    <p className="mt-2 text-sm text-[#888888]">{tonePreviewCopy[option]}</p>
+                    <p className="mt-2 text-sm text-muted">{tonePreviewCopy[option]}</p>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-5">
-            <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">Tone preview</p>
+          <div className="panel p-5">
+            <p className="section-label">Tone preview</p>
             <p className="mt-3 text-sm leading-7 text-white/80">
               {tonePreviewCopy[form.tone]}
             </p>
@@ -278,11 +285,13 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
 
       {(error || success) && (
         <div
+          aria-live="polite"
           className={`rounded-2xl border px-4 py-3 text-sm ${
             error
               ? "border-[#c05a4f]/40 bg-[#c05a4f]/10 text-[#f2c4bf]"
-              : "border-[#FF6B00]/25 bg-[#FF6B00]/10 text-[#C0C0C0]"
+              : "border-border bg-accent/10 text-silver"
           }`}
+          role={error ? "alert" : "status"}
         >
           {error ?? success}
         </div>
@@ -291,7 +300,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
       <div className="flex flex-wrap gap-3">
         {step > 1 ? (
           <button
-            className="rounded-xl border border-[#FF6B00]/25 px-4 py-3 text-sm text-[#C0C0C0] transition hover:border-[#FF6B00]"
+            className="btn-outline"
             onClick={() => setStep((current) => current - 1)}
             type="button"
           >
@@ -301,7 +310,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
 
         {step < 3 ? (
           <button
-            className="rounded-xl bg-[#FF6B00] px-4 py-3 text-sm font-medium text-[#0a0a0a] transition hover:bg-[#FF8C00]"
+            className="btn-primary text-sm"
             onClick={() => setStep((current) => current + 1)}
             type="button"
           >
@@ -309,7 +318,7 @@ export function CompanySetupForm({ initialData }: CompanySetupFormProps) {
           </button>
         ) : (
           <button
-            className="rounded-xl bg-[#FF6B00] px-4 py-3 text-sm font-medium text-[#0a0a0a] transition hover:bg-[#FF8C00] disabled:cursor-not-allowed disabled:opacity-60"
+            className="btn-primary text-sm"
             disabled={isSaving}
             onClick={handleSubmit}
             type="button"

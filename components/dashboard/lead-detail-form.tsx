@@ -60,7 +60,7 @@ export function LeadDetailForm({ permit }: Props) {
 
   return (
     <form
-      className="space-y-5 rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6"
+      className="space-y-5 panel p-6"
       onSubmit={handleSubmit}
     >
       <div className="grid gap-3 sm:grid-cols-2">
@@ -79,29 +79,18 @@ export function LeadDetailForm({ permit }: Props) {
           Lead status
         </label>
         <select
-          className="w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
+          aria-label="Lead status"
+          className="input-base"
           defaultValue={permit.lead_status}
           id="lead_status"
           name="lead_status"
         >
-          <option className="text-black" value="new">
-            New
-          </option>
-          <option className="text-black" value="bookmarked">
-            Bookmarked
-          </option>
-          <option className="text-black" value="contacted">
-            Contacted
-          </option>
-          <option className="text-black" value="in_progress">
-            In progress
-          </option>
-          <option className="text-black" value="closed_won">
-            Closed won
-          </option>
-          <option className="text-black" value="closed_lost">
-            Closed lost
-          </option>
+          <option value="new">New</option>
+          <option value="bookmarked">Bookmarked</option>
+          <option value="contacted">Contacted</option>
+          <option value="in_progress">In progress</option>
+          <option value="closed_won">Closed won</option>
+          <option value="closed_lost">Closed lost</option>
         </select>
       </div>
 
@@ -110,7 +99,7 @@ export function LeadDetailForm({ permit }: Props) {
           Notes
         </label>
         <textarea
-          className="min-h-40 w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
+          className="input-base min-h-40"
           defaultValue={permit.notes ?? ""}
           id="notes"
           name="notes"
@@ -119,15 +108,19 @@ export function LeadDetailForm({ permit }: Props) {
       </div>
 
       <button
-        className="rounded-xl bg-[#FF6B00] px-4 py-3 font-medium text-[#0a0a0a] transition hover:bg-[#FF8C00] disabled:cursor-not-allowed disabled:opacity-60"
+        className="btn-primary"
         disabled={isSaving}
         type="submit"
       >
         {isSaving ? "Saving..." : "Save lead details"}
       </button>
 
-      {error ? <p className="text-sm text-[#ff8a80]">{error}</p> : null}
-      {successMessage ? <p className="text-sm text-[#C0C0C0]">{successMessage}</p> : null}
+      {error ? (
+        <p aria-live="polite" className="text-sm text-[#ff8a80]" role="alert">{error}</p>
+      ) : null}
+      {successMessage ? (
+        <p aria-live="polite" className="text-sm text-silver">{successMessage}</p>
+      ) : null}
     </form>
   );
 }

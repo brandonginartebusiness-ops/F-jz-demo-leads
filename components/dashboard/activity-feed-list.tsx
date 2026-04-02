@@ -10,7 +10,7 @@ type Props = {
 export function ActivityFeedList({ entries, emptyState }: Props) {
   if (entries.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-[#FF6B00]/25 bg-[#1a1a1a] p-6 text-sm text-[#888888]">
+      <div className="panel border-dashed p-6 text-sm text-muted">
         {emptyState}
       </div>
     );
@@ -21,17 +21,17 @@ export function ActivityFeedList({ entries, emptyState }: Props) {
       {entries.map((entry) => (
         <article
           key={entry.id}
-          className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4"
+          className="panel p-4"
         >
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">
+              <p className="section-label">
                 {formatTimeAgo(entry.created_at)}
               </p>
               <div className="mt-2">
                 {entry.permit_id ? (
                   <Link
-                    className="text-base font-semibold text-white transition hover:text-[#FF6B00]"
+                    className="text-base font-semibold text-white transition hover:text-accent"
                     href={`/dashboard/${entry.permit_id}`}
                   >
                     {entry.permit_address || "Unknown address"}
@@ -43,15 +43,15 @@ export function ActivityFeedList({ entries, emptyState }: Props) {
                 )}
               </div>
             </div>
-            <span className="inline-flex rounded-full bg-[#FF6B00]/12 px-3 py-1 text-xs font-medium uppercase tracking-[0.15em] text-[#FF6B00]">
+            <span className="inline-flex rounded-full bg-accent-muted px-3 py-1 text-xs font-medium uppercase tracking-[0.15em] text-accent">
               {formatActionLabel(entry.action_type)}
             </span>
           </div>
 
-          <p className="mt-3 text-sm text-[#C0C0C0]">{describeActivity(entry)}</p>
+          <p className="mt-3 text-sm text-silver">{describeActivity(entry)}</p>
 
           {entry.note ? (
-            <div className="mt-3 rounded-xl border border-[#FF6B00]/20 bg-[#202020] px-4 py-3 text-sm text-white/80">
+            <div className="mt-3 rounded-xl border border-accent/20 bg-panel-soft px-4 py-3 text-sm text-white/80">
               {entry.note}
             </div>
           ) : null}

@@ -15,7 +15,7 @@ export function PermitsCards({ permits }: Props) {
       {permits.map((permit) => (
         <Link
           key={permit.id}
-          className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-5 transition hover:border-[#FF6B00] hover:bg-[#202020]"
+          className="panel p-5 transition hover:-translate-y-0.5 hover:border-accent hover:bg-panel-soft hover:shadow-lg hover:shadow-accent/5"
           href={`/dashboard/${permit.id}`}
         >
           <div className="flex items-start justify-between gap-3">
@@ -23,14 +23,14 @@ export function PermitsCards({ permits }: Props) {
               <h3 className="text-lg font-semibold text-white">
                 {permit.property_address || "Unknown address"}
               </h3>
-              <p className="mt-1 text-sm text-[#888888]">{permit.permit_number}</p>
+              <p className="mt-1 text-sm text-muted">{permit.permit_number}</p>
               <div className="mt-3">
                 <LeadTypeBadge leadType={permit.lead_type} />
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
               <PriorityBadge score={permit.priority_score} />
-              <span className="rounded-full bg-[#FF6B00]/15 px-3 py-1 text-xs font-medium text-[#C0C0C0]">
+              <span className="rounded-full bg-accent/15 px-3 py-1 text-xs font-medium text-silver">
                 {permit.lead_status}
               </span>
             </div>

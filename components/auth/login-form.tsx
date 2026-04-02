@@ -45,7 +45,7 @@ export function LoginForm({ redirectTo = "/dashboard" }: Props) {
           Email
         </label>
         <input
-          className="w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
+          className="input-base"
           id="email"
           name="email"
           placeholder="team@jzdemolition.com"
@@ -59,7 +59,7 @@ export function LoginForm({ redirectTo = "/dashboard" }: Props) {
           Password
         </label>
         <input
-          className="w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
+          className="input-base"
           id="password"
           name="password"
           required
@@ -68,13 +68,18 @@ export function LoginForm({ redirectTo = "/dashboard" }: Props) {
       </div>
 
       {error ? (
-        <p className="rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+        <p
+          aria-live="polite"
+          className="rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200"
+          id="login-error"
+          role="alert"
+        >
           {error}
         </p>
       ) : null}
 
       <button
-        className="w-full rounded-xl bg-[#FF6B00] px-4 py-3 font-medium text-[#0a0a0a] transition hover:bg-[#FF8C00] disabled:cursor-not-allowed disabled:opacity-70"
+        className="btn-primary w-full"
         disabled={loading}
         type="submit"
       >

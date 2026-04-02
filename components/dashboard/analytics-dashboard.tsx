@@ -18,6 +18,15 @@ type AnalyticsState =
   | { status: "ready"; data: AnalyticsData; error: null }
   | { status: "error"; data: null; error: string };
 
+function StatSkeleton() {
+  return (
+    <div className="panel-lg p-5">
+      <div className="skeleton h-3 w-24 rounded" />
+      <div className="skeleton mt-4 h-8 w-20 rounded" />
+    </div>
+  );
+}
+
 export function AnalyticsDashboard() {
   const [state, setState] = useState<AnalyticsState>({
     status: "loading",
@@ -67,17 +76,31 @@ export function AnalyticsDashboard() {
 
   if (state.status === "loading") {
     return (
-      <section className="rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6 text-sm text-[#888888]">
-        Loading analytics...
-      </section>
+      <div className="space-y-6 animate-fade-in">
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <StatSkeleton key={i} />
+          ))}
+        </section>
+        <div className="grid gap-6 xl:grid-cols-2">
+          <div className="panel-lg p-6">
+            <div className="skeleton h-4 w-32 rounded" />
+            <div className="skeleton mt-4 h-80 w-full rounded-xl" />
+          </div>
+          <div className="panel-lg p-6">
+            <div className="skeleton h-4 w-32 rounded" />
+            <div className="skeleton mt-4 h-80 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
     );
   }
 
   if (state.status === "error") {
     return (
-      <section className="rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
+      <section className="panel-lg p-6">
         <h2 className="text-lg font-semibold text-white">Analytics unavailable</h2>
-        <p className="mt-2 text-sm text-[#888888]">{state.error}</p>
+        <p className="mt-2 text-sm text-muted">{state.error}</p>
       </section>
     );
   }
@@ -85,38 +108,24 @@ export function AnalyticsDashboard() {
   const analytics = state.data;
 
   return (
-    <>
+    <div className="animate-fade-in">
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <div className="rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">Total permits</p>
-          <p className="mt-3 text-3xl font-semibold text-white">
-            {analytics.topStats.totalPermits.toLocaleString()}
-          </p>
-        </div>
-        <div className="rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">Pipeline value</p>
-          <p className="mt-3 text-3xl font-semibold text-white">
-            {formatCurrency(analytics.topStats.pipelineValue)}
-          </p>
-        </div>
-        <div className="rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">New this week</p>
-          <p className="mt-3 text-3xl font-semibold text-white">
-            {analytics.topStats.newThisWeek.toLocaleString()}
-          </p>
-        </div>
-        <div className="rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">Leads contacted</p>
-          <p className="mt-3 text-3xl font-semibold text-white">
-            {analytics.topStats.leadsContacted.toLocaleString()}
-          </p>
-        </div>
-        <div className="rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">Actions this week</p>
-          <p className="mt-3 text-3xl font-semibold text-white">
-            {analytics.topStats.activityThisWeek.toLocaleString()}
-          </p>
-        </div>
+        {[
+          { label: "Total permits", value: analytics.topStats.totalPermits.toLocaleString() },
+          { label: "Pipeline value", value: formatCurrency(analytics.topStats.pipelineValue) },
+          { label: "New this week", value: analytics.topStats.newThisWeek.toLocaleString() },
+          { label: "Leads contacted", value: analytics.topStats.leadsContacted.toLocaleString() },
+          { label: "Actions this week", value: analytics.topStats.activityThisWeek.toLocaleString() },
+        ].map((stat, i) => (
+          <div
+            key={stat.label}
+            className="panel-lg p-5 animate-slide-up"
+            style={{ animationDelay: `${i * 80}ms` }}
+          >
+            <p className="section-label">{stat.label}</p>
+            <p className="mt-3 text-3xl font-semibold text-white">{stat.value}</p>
+          </div>
+        ))}
       </section>
 
       <div className="mt-6">
@@ -127,10 +136,10 @@ export function AnalyticsDashboard() {
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-        <section className="rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
+        <section className="panel-lg p-6">
           <div className="mb-4">
             <h2 className="text-xl font-semibold text-white">Priority Breakdown</h2>
-            <p className="mt-1 text-sm text-[#888888]">
+            <p className="mt-1 text-sm text-muted">
               Lead priority derived from estimated value tiers.
             </p>
           </div>
@@ -138,10 +147,10 @@ export function AnalyticsDashboard() {
             {analytics.priorityBreakdown.map((priority) => (
               <div
                 key={priority.name}
-                className="inline-flex items-center gap-3 rounded-2xl border border-[#FF6B00]/25 bg-[#202020] px-4 py-3"
+                className="inline-flex items-center gap-3 rounded-2xl border border-border bg-panel-soft px-4 py-3"
               >
-                <span className="text-sm font-medium text-[#C0C0C0]">{priority.name}</span>
-                <span className="rounded-full bg-[#FF6B00]/10 px-3 py-1 text-sm font-semibold text-white">
+                <span className="text-sm font-medium text-silver">{priority.name}</span>
+                <span className="rounded-full bg-accent/10 px-3 py-1 text-sm font-semibold text-white">
                   {priority.value.toLocaleString()}
                 </span>
               </div>
@@ -149,30 +158,30 @@ export function AnalyticsDashboard() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
+        <section className="panel-lg p-6">
           <div className="mb-4">
             <h2 className="text-xl font-semibold text-white">Top Contractors</h2>
-            <p className="mt-1 text-sm text-[#888888]">
+            <p className="mt-1 text-sm text-muted">
               Top 10 contractors ranked by permit count, with total pipeline value.
             </p>
           </div>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-[#FF6B00]/25 text-sm">
-              <thead className="text-left text-xs uppercase tracking-[0.2em] text-[#888888]">
+            <table className="min-w-full divide-y divide-border text-sm">
+              <thead className="text-left section-label">
                 <tr>
                   <th className="px-0 py-3">Contractor</th>
                   <th className="px-0 py-3">Permits</th>
                   <th className="px-0 py-3 text-right">Total value</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#FF6B00]/25">
+              <tbody className="divide-y divide-border">
                 {analytics.topContractors.map((contractor) => (
                   <tr key={contractor.name}>
                     <td className="px-0 py-4 text-white">{contractor.name}</td>
-                    <td className="px-0 py-4 text-[#C0C0C0]">
+                    <td className="px-0 py-4 text-silver">
                       {contractor.permitCount.toLocaleString()}
                     </td>
-                    <td className="px-0 py-4 text-right text-[#C0C0C0]">
+                    <td className="px-0 py-4 text-right text-silver">
                       {formatCurrency(contractor.totalEstimatedValue)}
                     </td>
                   </tr>
@@ -184,26 +193,26 @@ export function AnalyticsDashboard() {
       </div>
 
       <div className="mt-6">
-        <section className="rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
+        <section className="panel-lg p-6">
           <div className="mb-4">
             <h2 className="text-xl font-semibold text-white">Most Active Areas</h2>
-            <p className="mt-1 text-sm text-[#888888]">
+            <p className="mt-1 text-sm text-muted">
               Top 10 street-area groups based on the first word in each address.
             </p>
           </div>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-[#FF6B00]/25 text-sm">
-              <thead className="text-left text-xs uppercase tracking-[0.2em] text-[#888888]">
+            <table className="min-w-full divide-y divide-border text-sm">
+              <thead className="text-left section-label">
                 <tr>
                   <th className="px-0 py-3">Area</th>
                   <th className="px-0 py-3 text-right">Permit count</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#FF6B00]/25">
+              <tbody className="divide-y divide-border">
                 {analytics.activeNeighborhoods.map((area) => (
                   <tr key={area.area}>
                     <td className="px-0 py-4 text-white">{area.area}</td>
-                    <td className="px-0 py-4 text-right text-[#C0C0C0]">
+                    <td className="px-0 py-4 text-right text-silver">
                       {area.permitCount.toLocaleString()}
                     </td>
                   </tr>
@@ -213,6 +222,6 @@ export function AnalyticsDashboard() {
           </div>
         </section>
       </div>
-    </>
+    </div>
   );
 }

@@ -49,6 +49,15 @@ function renderValue(value: string | number | null | undefined) {
   return String(value);
 }
 
+function DataCard({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="panel p-4">
+      <dt className="section-label">{label}</dt>
+      <dd className="mt-2 text-base text-white">{children}</dd>
+    </div>
+  );
+}
+
 export default async function PermitDetailPage({ params }: Props) {
   try {
     const permit = await getPermitById(params.id);
@@ -61,24 +70,24 @@ export default async function PermitDetailPage({ params }: Props) {
     );
 
     return (
-      <main className="mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <main id="main-content" className="mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <Link className="text-sm text-[#C0C0C0] hover:text-white" href="/dashboard">
+          <Link className="text-sm text-silver transition hover:text-white" href="/dashboard">
             Back to dashboard
           </Link>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
-          <section className="space-y-6 rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
+        <div className="grid gap-6 animate-fade-in xl:grid-cols-[1.25fr_0.75fr]">
+          <section className="space-y-6 panel-lg p-4 sm:p-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-[#C0C0C0]">
+                <p className="page-label">
                   Permit detail
                 </p>
                 <h1 className="mt-3 text-3xl font-semibold text-white">
                   {permit.property_address || "Unknown address"}
                 </h1>
-                <p className="mt-2 text-sm text-[#888888]">
+                <p className="mt-2 text-sm text-muted">
                   Permit {permit.permit_number}
                 </p>
                 <div className="mt-4">
@@ -89,125 +98,64 @@ export default async function PermitDetailPage({ params }: Props) {
             </div>
 
             <section className="space-y-4">
-              <h2 className="text-sm uppercase tracking-[0.2em] text-[#888888]">Property</h2>
+              <h2 className="section-label">Property</h2>
               <dl className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4 sm:col-span-2">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Address</dt>
+                <div className="panel p-4 sm:col-span-2">
+                  <dt className="section-label">Address</dt>
                   <dd className="mt-2 text-base text-white">{permit.property_address || "N/A"}</dd>
                 </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">City / State</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {[permit.city, permit.state].filter(Boolean).join(", ") || "N/A"}
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Folio Number</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {propertyAppraiserUrl ? (
-                      <a
-                        className="text-[#FF6B00] hover:text-[#FF8C00]"
-                        href={propertyAppraiserUrl}
-                        rel="noreferrer"
-                        target="_blank"
-                      >
-                        {permit.folio_number || "N/A"}
-                      </a>
-                    ) : (
-                      permit.folio_number || "N/A"
-                    )}
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4 sm:col-span-2">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Legal Description</dt>
+                <DataCard label="City / State">
+                  {[permit.city, permit.state].filter(Boolean).join(", ") || "N/A"}
+                </DataCard>
+                <DataCard label="Folio Number">
+                  {propertyAppraiserUrl ? (
+                    <a
+                      className="text-accent transition hover:text-accent-hover"
+                      href={propertyAppraiserUrl}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      {permit.folio_number || "N/A"}
+                    </a>
+                  ) : (
+                    permit.folio_number || "N/A"
+                  )}
+                </DataCard>
+                <div className="panel p-4 sm:col-span-2">
+                  <dt className="section-label">Legal Description</dt>
                   <dd className="mt-2 text-base text-white">
                     {[permit.legal_description_1, permit.legal_description_2]
                       .filter(Boolean)
                       .join(" ") || "N/A"}
                   </dd>
                 </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Square Footage</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {permit.square_footage?.toLocaleString() || "N/A"}
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Floors / Units</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {permit.structure_floors ?? "N/A"} / {permit.structure_units ?? "N/A"}
-                  </dd>
-                </div>
+                <DataCard label="Square Footage">
+                  {permit.square_footage?.toLocaleString() || "N/A"}
+                </DataCard>
+                <DataCard label="Floors / Units">
+                  {permit.structure_floors ?? "N/A"} / {permit.structure_units ?? "N/A"}
+                </DataCard>
               </dl>
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-sm uppercase tracking-[0.2em] text-[#888888]">Permit</h2>
+              <h2 className="section-label">Permit</h2>
               <dl className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Permit Number</dt>
-                  <dd className="mt-2 text-base text-white">{permit.permit_number}</dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Process Number</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {permit.process_number || "N/A"}
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Master Permit Number</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {permit.master_permit_number || "N/A"}
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Permit Type</dt>
-                  <dd className="mt-2 text-base text-white">{permit.permit_type || "N/A"}</dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Application Type</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {permit.application_type_description || "N/A"}
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Lead Type</dt>
-                  <dd className="mt-2">
-                    <LeadTypeBadge leadType={permit.lead_type} />
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Description</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {permit.detail_description || "N/A"}
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Issued Date</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {formatDateOnly(permit.permit_issued_date)}
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Application Date</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {formatDate(permit.application_date)}
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Estimated Value</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {formatEstimatedValue(permit.estimated_value)}
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Permit Total Fee</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {permit.permit_total_fee || "N/A"}
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4 sm:col-span-2">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Proposed Use</dt>
+                <DataCard label="Permit Number">{permit.permit_number}</DataCard>
+                <DataCard label="Process Number">{permit.process_number || "N/A"}</DataCard>
+                <DataCard label="Master Permit Number">{permit.master_permit_number || "N/A"}</DataCard>
+                <DataCard label="Permit Type">{permit.permit_type || "N/A"}</DataCard>
+                <DataCard label="Application Type">{permit.application_type_description || "N/A"}</DataCard>
+                <DataCard label="Lead Type">
+                  <LeadTypeBadge leadType={permit.lead_type} />
+                </DataCard>
+                <DataCard label="Description">{permit.detail_description || "N/A"}</DataCard>
+                <DataCard label="Issued Date">{formatDateOnly(permit.permit_issued_date)}</DataCard>
+                <DataCard label="Application Date">{formatDate(permit.application_date)}</DataCard>
+                <DataCard label="Estimated Value">{formatEstimatedValue(permit.estimated_value)}</DataCard>
+                <DataCard label="Permit Total Fee">{permit.permit_total_fee || "N/A"}</DataCard>
+                <div className="panel p-4 sm:col-span-2">
+                  <dt className="section-label">Proposed Use</dt>
                   <dd className="mt-2 text-base text-white">
                     {permit.proposed_use_description || "N/A"}
                   </dd>
@@ -216,32 +164,14 @@ export default async function PermitDetailPage({ params }: Props) {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-sm uppercase tracking-[0.2em] text-[#888888]">People</h2>
+              <h2 className="section-label">People</h2>
               <dl className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Owner</dt>
-                  <dd className="mt-2 text-base text-white">{permit.owner_name || "N/A"}</dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Architect</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {permit.architect_name || "N/A"}
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Contractor</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {permit.contractor_name || "N/A"}
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Contractor Phone</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {permit.contractor_phone || "N/A"}
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4 sm:col-span-2">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Contractor Address</dt>
+                <DataCard label="Owner">{permit.owner_name || "N/A"}</DataCard>
+                <DataCard label="Architect">{permit.architect_name || "N/A"}</DataCard>
+                <DataCard label="Contractor">{permit.contractor_name || "N/A"}</DataCard>
+                <DataCard label="Contractor Phone">{permit.contractor_phone || "N/A"}</DataCard>
+                <div className="panel p-4 sm:col-span-2">
+                  <dt className="section-label">Contractor Address</dt>
                   <dd className="mt-2 text-base text-white">
                     {[
                       permit.contractor_address,
@@ -257,31 +187,18 @@ export default async function PermitDetailPage({ params }: Props) {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-sm uppercase tracking-[0.2em] text-[#888888]">Inspection</h2>
+              <h2 className="section-label">Inspection</h2>
               <dl className="grid gap-4 sm:grid-cols-3">
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Last Inspection</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {renderValue(permit.last_inspection_date)}
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Last Approved Inspection</dt>
-                  <dd className="mt-2 text-base text-white">
-                    {renderValue(permit.last_approved_insp_date)}
-                  </dd>
-                </div>
-                <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                  <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">Certificate of Completion</dt>
-                  <dd className="mt-2 text-base text-white">{renderValue(permit.cocc_date)}</dd>
-                </div>
+                <DataCard label="Last Inspection">{renderValue(permit.last_inspection_date)}</DataCard>
+                <DataCard label="Last Approved Inspection">{renderValue(permit.last_approved_insp_date)}</DataCard>
+                <DataCard label="Certificate of Completion">{renderValue(permit.cocc_date)}</DataCard>
               </dl>
             </section>
 
             {mapsEmbedUrl ? (
               <section className="space-y-4">
-                <h2 className="text-sm uppercase tracking-[0.2em] text-[#888888]">Map</h2>
-                <div className="overflow-hidden rounded-2xl border border-[#FF6B00]/25">
+                <h2 className="section-label">Map</h2>
+                <div className="overflow-hidden rounded-2xl border border-border">
                   <iframe
                     className="h-72 w-full"
                     loading="lazy"
@@ -293,19 +210,17 @@ export default async function PermitDetailPage({ params }: Props) {
               </section>
             ) : null}
 
-            <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
+            <div className="panel p-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-sm uppercase tracking-[0.2em] text-[#888888]">
-                    Source record
-                  </h2>
-                  <p className="mt-2 text-sm text-[#888888]">
+                  <h2 className="section-label">Source record</h2>
+                  <p className="mt-2 text-sm text-muted">
                     This is the original permit data returned by the county feed for
                     this record.
                   </p>
                 </div>
               </div>
-              <pre className="mt-4 overflow-x-auto text-xs text-white/70">
+              <pre className="mt-4 overflow-x-auto rounded-xl bg-panel-soft p-4 text-xs text-white/70">
                 {JSON.stringify(permit.raw_data, null, 2)}
               </pre>
             </div>
@@ -313,27 +228,23 @@ export default async function PermitDetailPage({ params }: Props) {
 
           <aside>
             <div className="space-y-6">
-              <section className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
+              <section className="panel p-6">
                 <div className="mb-4">
                   <h2 className="text-lg font-semibold text-white">Lead Tracking</h2>
-                  <p className="mt-1 text-sm text-[#888888]">
+                  <p className="mt-1 text-sm text-muted">
                     Manage pipeline status, review priority, and keep notes on this lead.
                   </p>
                 </div>
-                <div className="mb-5 rounded-2xl border border-[#FF6B00]/20 bg-[#202020] p-4">
+                <div className="mb-5 rounded-2xl border border-accent/20 bg-panel-soft p-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">
-                        Lead type
-                      </p>
+                      <p className="section-label">Lead type</p>
                       <div className="mt-2">
                         <LeadTypeBadge leadType={permit.lead_type} />
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">
-                        Priority score
-                      </p>
+                      <p className="section-label">Priority score</p>
                       <div className="mt-2">
                         <PriorityBadge score={permit.priority_score} />
                       </div>
@@ -343,10 +254,10 @@ export default async function PermitDetailPage({ params }: Props) {
                 <LeadDetailForm permit={permit} />
               </section>
 
-              <section className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
+              <section className="panel p-6">
                 <div className="mb-4">
                   <h2 className="text-lg font-semibold text-white">Recent activity</h2>
-                  <p className="mt-1 text-sm text-[#888888]">
+                  <p className="mt-1 text-sm text-muted">
                     The latest five updates for this lead, newest first.
                   </p>
                 </div>

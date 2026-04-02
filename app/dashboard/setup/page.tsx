@@ -32,24 +32,24 @@ export default async function SetupPage() {
   const lastUpdated = formatUpdatedAt(companyContext?.updated_at ?? null);
 
   return (
-    <main className="mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mb-8 flex flex-col gap-6 rounded-3xl bg-[#1a1a1a] p-6">
+    <main id="main-content" className="mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mb-8 flex flex-col gap-6 rounded-3xl bg-panel p-6 animate-fade-in">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-[#C0C0C0]">
+            <p className="page-label">
               Company setup
             </p>
             <h1 className="mt-3 text-3xl font-semibold text-white">
               Configure outreach context
             </h1>
-            <p className="mt-3 max-w-2xl text-sm text-[#888888]">
+            <p className="mt-3 max-w-2xl text-sm text-muted">
               Capture your service areas, positioning, project sizes, and voice so the
               rest of the lead workflow has the right context.
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">Status</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <div className="stat-card">
+              <p className="section-label">Status</p>
               <p className="mt-1 text-xl font-semibold text-white">
                 {companyContext ? "Configured" : "Needs setup"}
               </p>
@@ -64,7 +64,7 @@ export default async function SetupPage() {
       </div>
 
       {lastUpdated ? (
-        <div className="mb-6 rounded-2xl border border-[#FF6B00]/25 bg-[#FF6B00]/10 px-4 py-3 text-sm text-[#C0C0C0]">
+        <div className="mb-6 panel bg-accent/10 px-4 py-3 text-sm text-silver">
           Last updated {lastUpdated}
         </div>
       ) : null}
