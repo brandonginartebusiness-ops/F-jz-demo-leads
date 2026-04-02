@@ -33,6 +33,10 @@ yarn-error.log*
 
 # cursor skills
 .cursor/skills/
+
+# claude
+.claude/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
