@@ -5,6 +5,7 @@ export type DashboardSearchParams = {
   leadStatus?: string;
   leadType?: string;
   showJunk?: string;
+  showResidential?: string;
   priorityLabel?: string;
   dateFrom?: string;
   dateTo?: string;
@@ -17,20 +18,34 @@ export type DashboardSearchParams = {
   view?: string;
 };
 
+export function getEffectiveDashboardSearchParams(searchParams: DashboardSearchParams) {
+  return {
+    ...searchParams,
+    leadType: searchParams.leadType ?? "full_demolition",
+    showResidential: searchParams.showResidential ?? "false",
+    sort: searchParams.sort ?? "date_desc",
+  } satisfies DashboardSearchParams;
+}
+
 export async function listPermits(searchParams: DashboardSearchParams) {
+  const effectiveSearchParams = getEffectiveDashboardSearchParams(searchParams);
   const supabase = createClient();
   let query = supabase.from("permits").select("*");
-  const normalizedSearch = normalizeSearchTerm(searchParams.search);
-  const normalizedPriorityLabel = normalizePriorityLabel(searchParams.priorityLabel);
+  const normalizedSearch = normalizeSearchTerm(effectiveSearchParams.search);
+  const normalizedPriorityLabel = normalizePriorityLabel(effectiveSearchParams.priorityLabel);
 
-  if (searchParams.leadStatus) {
-    query = query.eq("lead_status", searchParams.leadStatus);
+  if (effectiveSearchParams.leadStatus) {
+    query = query.eq("lead_status", effectiveSearchParams.leadStatus);
   }
 
-  if (searchParams.leadType) {
-    query = query.eq("lead_type", searchParams.leadType);
-  } else if (searchParams.showJunk !== "true") {
+  if (effectiveSearchParams.leadType) {
+    query = query.eq("lead_type", effectiveSearchParams.leadType);
+  } else if (effectiveSearchParams.showJunk !== "true") {
     query = query.neq("lead_type", "junk");
+  }
+
+  if (effectiveSearchParams.showResidential !== "true") {
+    query = query.eq("residential_commercial", "C");
   }
 
   if (normalizedPriorityLabel) {
@@ -47,28 +62,28 @@ export async function listPermits(searchParams: DashboardSearchParams) {
     }
   }
 
-  if (searchParams.dateFrom) {
-    query = query.gte("permit_issued_date", searchParams.dateFrom);
+  if (effectiveSearchParams.dateFrom) {
+    query = query.gte("permit_issued_date", effectiveSearchParams.dateFrom);
   }
 
-  if (searchParams.dateTo) {
-    query = query.lte("permit_issued_date", searchParams.dateTo);
+  if (effectiveSearchParams.dateTo) {
+    query = query.lte("permit_issued_date", effectiveSearchParams.dateTo);
   }
 
-  if (searchParams.minValue) {
-    query = query.gte("estimated_value", Number(searchParams.minValue));
+  if (effectiveSearchParams.minValue) {
+    query = query.gte("estimated_value", Number(effectiveSearchParams.minValue));
   }
 
-  if (searchParams.maxValue) {
-    query = query.lte("estimated_value", Number(searchParams.maxValue));
+  if (effectiveSearchParams.maxValue) {
+    query = query.lte("estimated_value", Number(effectiveSearchParams.maxValue));
   }
 
-  if (searchParams.minSqFt) {
-    query = query.gte("square_footage", Number(searchParams.minSqFt));
+  if (effectiveSearchParams.minSqFt) {
+    query = query.gte("square_footage", Number(effectiveSearchParams.minSqFt));
   }
 
-  if (searchParams.maxSqFt) {
-    query = query.lte("square_footage", Number(searchParams.maxSqFt));
+  if (effectiveSearchParams.maxSqFt) {
+    query = query.lte("square_footage", Number(effectiveSearchParams.maxSqFt));
   }
 
   if (normalizedSearch) {
@@ -83,7 +98,7 @@ export async function listPermits(searchParams: DashboardSearchParams) {
     );
   }
 
-  switch (searchParams.sort) {
+  switch (effectiveSearchParams.sort) {
     case "priority_asc":
       query = query
         .order("priority_score", { ascending: true, nullsFirst: false })

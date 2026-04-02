@@ -38,10 +38,10 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
   return (
     <div className="card p-5">
       <form className="space-y-4" onSubmit={handleSubmit}>
-        <div className="grid gap-3 lg:grid-cols-6">
+        <div className="grid gap-3 lg:grid-cols-10">
           <input
             aria-label="Search permits"
-            className="input-compact lg:col-span-2"
+            className="input-compact lg:col-span-4"
             defaultValue={searchParams.search}
             name="search"
             placeholder="Search address, owner, contractor..."
@@ -84,17 +84,9 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
             <option value="Low">Low</option>
           </select>
 
-          <button
-            className="btn-ghost-sm lg:hidden"
-            onClick={() => setExpanded((v) => !v)}
-            type="button"
-          >
-            {expanded ? "Hide filters" : "More filters"}
-          </button>
         </div>
 
-        {/* Advanced filters */}
-        <div className={`grid gap-3 lg:grid-cols-6 ${expanded ? "" : "hidden lg:grid"}`}>
+        <div className="grid gap-3 lg:grid-cols-10">
           <input
             aria-label="Date from"
             className="input-compact"
@@ -138,6 +130,19 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
             placeholder="Max value"
             type="number"
           />
+        </div>
+
+        <div className="flex items-center justify-between gap-3">
+          <button
+            className="btn-ghost-sm text-xs"
+            onClick={() => setExpanded((v) => !v)}
+            type="button"
+          >
+            {expanded ? "Hide advanced" : "Advanced"}
+          </button>
+        </div>
+
+        <div className={`grid gap-3 lg:grid-cols-4 ${expanded ? "" : "hidden"}`}>
           <input
             className="input-compact"
             defaultValue={searchParams.minSqFt}
@@ -161,38 +166,51 @@ export function DashboardFilters({ searchParams }: FiltersProps) {
             <option value="false">Hide junk</option>
             <option value="true">Show junk</option>
           </select>
+          <select
+            aria-label="Commercial or all properties"
+            className="input-compact"
+            defaultValue={searchParams.showResidential ?? "false"}
+            name="showResidential"
+          >
+            <option value="false">Commercial only</option>
+            <option value="true">Show residential too</option>
+          </select>
         </div>
 
         <input name="view" type="hidden" value={searchParams.view ?? "table"} />
 
-        {/* Quick type pills */}
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Quick lead type filters">
-          <LeadTypeLink currentParams={currentParams} label="Full Demo" pathname={pathname} searchParams={searchParams} value="full_demolition" />
-          <LeadTypeLink currentParams={currentParams} label="Partial" pathname={pathname} searchParams={searchParams} value="partial_demolition" />
-          <LeadTypeLink currentParams={currentParams} label="Related" pathname={pathname} searchParams={searchParams} value="demo_related" />
-          <LeadTypeLink currentParams={currentParams} label="Show All" pathname={pathname} searchParams={searchParams} value="" />
-        </div>
+        <div className="flex flex-col gap-3 border-t border-stroke pt-4 lg:flex-row lg:items-center lg:justify-between">
+          <div
+            className="inline-flex w-full flex-wrap rounded-xl border border-stroke bg-[#0f0f0f] p-1 lg:w-auto"
+            role="group"
+            aria-label="Quick lead type filters"
+          >
+            <LeadTypeLink currentParams={currentParams} label="Full Demo" pathname={pathname} searchParams={searchParams} value="full_demolition" />
+            <LeadTypeLink currentParams={currentParams} label="Partial" pathname={pathname} searchParams={searchParams} value="partial_demolition" />
+            <LeadTypeLink currentParams={currentParams} label="Related" pathname={pathname} searchParams={searchParams} value="demo_related" />
+            <LeadTypeLink currentParams={currentParams} label="Show All" pathname={pathname} searchParams={searchParams} value="" />
+          </div>
 
-        {/* Action buttons */}
-        <div className="flex flex-wrap items-center gap-3 border-t border-stroke pt-4">
-          <button className="btn-accent-sm" type="submit">
-            Apply
-          </button>
-          <Link className="btn-ghost-sm" href="/dashboard">
-            Reset
-          </Link>
-          <Link
-            className="btn-ghost-sm"
-            href={`/dashboard?${new URLSearchParams({ ...currentParams, view: nextView }).toString()}`}
-          >
-            {nextView === "cards" ? "Cards" : "Table"}
-          </Link>
-          <Link
-            className="btn-ghost-sm"
-            href={`/api/export?${new URLSearchParams(currentParams).toString()}`}
-          >
-            Export CSV
-          </Link>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <button className="btn-accent-sm" type="submit">
+              Apply
+            </button>
+            <Link className="btn-ghost-sm text-xs" href="/dashboard">
+              Reset
+            </Link>
+            <Link
+              className="btn-ghost-sm text-xs"
+              href={`/dashboard?${new URLSearchParams({ ...currentParams, view: nextView }).toString()}`}
+            >
+              {nextView === "cards" ? "Cards" : "Table"}
+            </Link>
+            <Link
+              className="btn-ghost-sm text-xs"
+              href={`/api/export?${new URLSearchParams(currentParams).toString()}`}
+            >
+              Export CSV
+            </Link>
+          </div>
         </div>
       </form>
     </div>
@@ -221,10 +239,10 @@ function LeadTypeLink({ pathname, currentParams, searchParams, value, label }: L
 
   return (
     <Link
-      className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-stencil transition-all duration-200 ${
+      className={`rounded-lg px-4 py-1.5 text-xs font-semibold uppercase tracking-stencil transition-all duration-200 ${
         isActive
-          ? "bg-accent text-white shadow-md shadow-accent/20"
-          : "border border-stroke text-sand hover:border-sand/30 hover:text-sand-bright"
+          ? "bg-accent text-white"
+          : "border border-transparent text-sand hover:border-stroke hover:text-sand-bright"
       }`}
       href={nextParams.toString() ? `${pathname}?${nextParams.toString()}` : pathname}
     >

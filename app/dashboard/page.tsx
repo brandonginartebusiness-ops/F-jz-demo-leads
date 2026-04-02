@@ -4,13 +4,18 @@ import { PermitsCards } from "@/components/dashboard/permits-cards";
 import { PermitsTable } from "@/components/dashboard/permits-table";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { getLatestCompanyContext } from "@/lib/company-context/queries";
-import { listPermits, type DashboardSearchParams } from "@/lib/permits/queries";
+import {
+  getEffectiveDashboardSearchParams,
+  listPermits,
+  type DashboardSearchParams,
+} from "@/lib/permits/queries";
 
 type Props = {
   searchParams: DashboardSearchParams;
 };
 
 export default async function DashboardPage({ searchParams }: Props) {
+  const effectiveSearchParams = getEffectiveDashboardSearchParams(searchParams);
   const permits = await listPermits(searchParams);
   const companyContext = await getLatestCompanyContext();
   const totalValue = permits.reduce(
@@ -22,12 +27,12 @@ export default async function DashboardPage({ searchParams }: Props) {
   return (
     <main id="main-content" className="mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       {/* Header */}
-      <header className="hazard-top mb-8 card p-6 animate-enter">
+      <header className="mb-5 card p-5 animate-enter">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="label-stencil text-accent">Internal Dashboard</p>
-            <h1 className="mt-2 font-display text-4xl text-sand-bright lg:text-5xl">
-              MIAMI-DADE DEMOLITION LEADS
+            <h1 className="mt-2 text-[28px] font-semibold text-sand-bright">
+              Miami-Dade demolition leads
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-sand">
               Review official demolition permits plus hidden demo-related commercial
@@ -61,8 +66,8 @@ export default async function DashboardPage({ searchParams }: Props) {
       </header>
 
       {/* Content */}
-      <div className="space-y-5">
-        <DashboardFilters searchParams={searchParams} />
+      <div className="space-y-4">
+        <DashboardFilters searchParams={effectiveSearchParams} />
 
         {permits.length === 0 ? (
           <div className="card border-dashed p-12 text-center">
@@ -71,10 +76,10 @@ export default async function DashboardPage({ searchParams }: Props) {
               Try adjusting your filters or resetting to see all leads.
             </p>
           </div>
-        ) : searchParams.view === "cards" ? (
+        ) : effectiveSearchParams.view === "cards" ? (
           <PermitsCards permits={permits} />
         ) : (
-          <PermitsTable permits={permits} />
+          <PermitsTable permits={permits} initialSort={effectiveSearchParams.sort} />
         )}
       </div>
     </main>

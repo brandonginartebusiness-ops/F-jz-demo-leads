@@ -18,6 +18,7 @@ export const JOB_TITLE_PRESETS = [
 ] as const;
 
 export const DEFAULT_LOCATION = "Miami, FL";
+export const DEFAULT_PROPERTY_TYPES = ["commercial"] as const;
 
 const tagArraySchema = z
   .array(z.string().trim().min(1).max(120))
@@ -37,6 +38,11 @@ export const icpProfileSchema = z
     company_size_max: nullableIntSchema,
     job_titles: tagArraySchema,
     locations: tagArraySchema,
+    property_types: z
+      .array(z.enum(["commercial", "residential"]))
+      .max(2)
+      .optional()
+      .default([...DEFAULT_PROPERTY_TYPES]),
   })
   .superRefine((value, ctx) => {
     if (
@@ -56,6 +62,7 @@ export const icpProfileSchema = z
     industries: uniqueTrimmed(value.industries),
     job_titles: uniqueTrimmed(value.job_titles),
     locations: withDefaultLocation(uniqueTrimmed(value.locations)),
+    property_types: withDefaultPropertyTypes(value.property_types),
   }));
 
 export type IcpProfileInput = z.input<typeof icpProfileSchema>;
@@ -69,6 +76,7 @@ export type IcpProfileRecord = {
   company_size_max: number | null;
   job_titles: string[] | null;
   locations: string[] | null;
+  property_types: string[] | null;
   is_active: boolean;
   created_at: string;
 };
@@ -81,4 +89,8 @@ function uniqueTrimmed(values: string[]) {
 
 function withDefaultLocation(values: string[]) {
   return values.length > 0 ? values : [DEFAULT_LOCATION];
+}
+
+function withDefaultPropertyTypes(values: string[]) {
+  return values.length > 0 ? values : [...DEFAULT_PROPERTY_TYPES];
 }

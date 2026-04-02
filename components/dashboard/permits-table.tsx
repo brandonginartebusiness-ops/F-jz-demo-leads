@@ -10,6 +10,7 @@ import { PermitRecord } from "@/lib/types";
 
 type Props = {
   permits: PermitRecord[];
+  initialSort?: string;
 };
 
 type SortKey = "date" | "address" | "value" | "sqft" | "floors" | "priority" | "close";
@@ -68,22 +69,44 @@ function SortHeader({
     <th className="px-4 py-3">
       <button
         aria-label={`Sort by ${label}`}
-        className={`inline-flex items-center gap-1 transition-colors hover:text-sand-bright ${active ? "text-accent" : ""}`}
+        className={`inline-flex items-center gap-1 transition-colors hover:text-sand-bright ${active ? "text-accent" : "text-sand/70"}`}
         onClick={() => onSort(key)}
         type="button"
       >
         {label}
-        <span className="text-[10px]">
-          {active ? (sortDir === "asc" ? "▲" : "▼") : "⇅"}
-        </span>
+        {active ? <span className="text-[10px]">{sortDir === "asc" ? "↑" : "↓"}</span> : null}
       </button>
     </th>
   );
 }
 
-export function PermitsTable({ permits }: Props) {
-  const [sortKey, setSortKey] = useState<SortKey | null>(null);
-  const [sortDir, setSortDir] = useState<SortDir>("desc");
+function getInitialSort(sort: string | undefined): { key: SortKey | null; dir: SortDir } {
+  switch (sort) {
+    case "date_asc":
+      return { key: "date", dir: "asc" };
+    case "date_desc":
+      return { key: "date", dir: "desc" };
+    case "value_asc":
+      return { key: "value", dir: "asc" };
+    case "value_desc":
+      return { key: "value", dir: "desc" };
+    case "sqft_asc":
+      return { key: "sqft", dir: "asc" };
+    case "sqft_desc":
+      return { key: "sqft", dir: "desc" };
+    case "priority_asc":
+      return { key: "priority", dir: "asc" };
+    case "priority_desc":
+      return { key: "priority", dir: "desc" };
+    default:
+      return { key: "date", dir: "desc" };
+  }
+}
+
+export function PermitsTable({ permits, initialSort }: Props) {
+  const initial = getInitialSort(initialSort);
+  const [sortKey, setSortKey] = useState<SortKey | null>(initial.key);
+  const [sortDir, setSortDir] = useState<SortDir>(initial.dir);
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -163,10 +186,10 @@ export function PermitsTable({ permits }: Props) {
                   key={permit.id}
                   className="transition-colors duration-150 hover:bg-bg-soft/60"
                 >
-                  <td className="whitespace-nowrap px-4 py-3.5 font-mono text-xs text-sand">
+                  <td className="whitespace-nowrap px-4 py-2.5 font-mono text-xs text-sand">
                     {formatDate(permit.permit_issued_date)}
                   </td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-4 py-2.5">
                     <Link
                       className="font-medium text-sand-bright transition-colors hover:text-accent"
                       href={`/dashboard/${permit.id}`}
@@ -175,31 +198,36 @@ export function PermitsTable({ permits }: Props) {
                     </Link>
                     <p className="mt-0.5 font-mono text-[11px] text-sand/50">{permit.permit_number}</p>
                   </td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-4 py-2.5">
                     <LeadTypeBadge leadType={permit.lead_type} />
                   </td>
-                  <td className="max-w-[180px] truncate px-4 py-3.5 text-sand">
+                  <td className="max-w-[180px] truncate px-4 py-2.5 text-sand">
                     {permit.detail_description || "—"}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3.5 font-mono text-sand">
+                  <td className="whitespace-nowrap px-4 py-2.5 font-mono text-sand">
                     {formatEstimatedValue(permit.estimated_value)}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3.5 font-mono text-sand">
+                  <td className="whitespace-nowrap px-4 py-2.5 font-mono text-sand">
                     {permit.square_footage?.toLocaleString() ?? "—"}
                   </td>
-                  <td className="px-4 py-3.5 font-mono text-sand">{permit.structure_floors ?? "—"}</td>
-                  <td className="px-4 py-3.5 text-sand">{permit.owner_name || "—"}</td>
-                  <td className="px-4 py-3.5 text-sand">{permit.contractor_name || "—"}</td>
-                  <td className="whitespace-nowrap px-4 py-3.5 font-mono text-xs text-sand">
+                  <td className="px-4 py-2.5 font-mono text-sand">{permit.structure_floors ?? "—"}</td>
+                  <td className="px-4 py-2.5 text-sand">{permit.owner_name || "—"}</td>
+                  <td
+                    className="max-w-[220px] truncate px-4 py-2.5 text-sand"
+                    title={permit.contractor_name || "—"}
+                  >
+                    {permit.contractor_name || "—"}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-2.5 font-mono text-xs text-sand">
                     {permit.contractor_phone || "—"}
                   </td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-4 py-2.5">
                     <PriorityBadge score={permit.priority_score} />
                   </td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-4 py-2.5">
                     <CloseBadge probability={permit.close_probability_score} />
                   </td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-4 py-2.5">
                     <span className="rounded border border-stroke bg-bg-soft px-2.5 py-1 text-xs font-medium capitalize text-sand">
                       {(permit.lead_status ?? "new").replace("_", " ")}
                     </span>

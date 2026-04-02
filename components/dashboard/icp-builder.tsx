@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import {
   DEFAULT_LOCATION,
+  DEFAULT_PROPERTY_TYPES,
   INDUSTRY_PRESETS,
   JOB_TITLE_PRESETS,
   type IcpProfileInput,
@@ -12,6 +13,8 @@ import {
 
 import { DeleteIcpModal } from "./delete-icp-modal";
 import { TagInput } from "./tag-input";
+
+type PropertyType = "commercial" | "residential";
 
 type IcpBuilderProps = {
   initialProfiles: IcpProfileRecord[];
@@ -24,6 +27,7 @@ type FormState = {
   company_size_max: string;
   job_titles: string[];
   locations: string[];
+  property_types: PropertyType[];
 };
 
 const initialFormState: FormState = {
@@ -33,6 +37,7 @@ const initialFormState: FormState = {
   company_size_max: "",
   job_titles: [],
   locations: [DEFAULT_LOCATION],
+  property_types: [...DEFAULT_PROPERTY_TYPES],
 };
 
 function formatCompanySize(min: number | null, max: number | null) {
@@ -59,7 +64,20 @@ function normalizePayload(form: FormState): IcpProfileInput {
     company_size_max: form.company_size_max ? Number(form.company_size_max) : null,
     job_titles: form.job_titles,
     locations: form.locations,
+    property_types: form.property_types,
   };
+}
+
+function togglePropertyType(
+  current: PropertyType[],
+  value: PropertyType,
+  checked: boolean,
+): PropertyType[] {
+  if (checked) {
+    return Array.from(new Set([...current, value])) as PropertyType[];
+  }
+
+  return current.filter((entry) => entry !== value);
 }
 
 export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
@@ -158,7 +176,8 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
             </h2>
             <p className="mt-2 max-w-3xl text-sm text-[#888888]">
               Save target industries, buyer titles, employee ranges, and locations
-              so your pipeline can reuse them later.
+              so your pipeline can reuse them later. New profiles default to
+              commercial properties only.
             </p>
           </div>
 
@@ -179,6 +198,54 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
                 placeholder="South Florida hospital facility teams"
                 value={form.name}
               />
+            </div>
+
+            <div className="lg:col-span-2">
+              <label className="mb-2 block text-sm font-medium text-white">
+                Property types
+              </label>
+              <div className="flex flex-wrap gap-3 rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
+                <label className="flex items-center gap-2 text-sm text-white">
+                  <input
+                    checked={form.property_types.includes("commercial")}
+                    className="h-4 w-4 accent-[#FF6B00]"
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        property_types: togglePropertyType(
+                          current.property_types,
+                          "commercial",
+                          event.target.checked,
+                        ),
+                      }))
+                    }
+                    type="checkbox"
+                  />
+                  Commercial
+                </label>
+                <label className="flex items-center gap-2 text-sm text-white">
+                  <input
+                    checked={form.property_types.includes("residential")}
+                    className="h-4 w-4 accent-[#FF6B00]"
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        property_types: togglePropertyType(
+                          current.property_types,
+                          "residential",
+                          event.target.checked,
+                        ),
+                      }))
+                    }
+                    type="checkbox"
+                  />
+                  Residential
+                </label>
+              </div>
+              <p className="mt-2 text-xs text-[#888888]">
+                Commercial is selected by default so new targeting profiles stay aligned
+                with the dashboard.
+              </p>
             </div>
 
             <div className="lg:col-span-2">
@@ -329,6 +396,20 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
                   </div>
 
                   <dl className="mt-5 space-y-4 text-sm">
+                    <div>
+                      <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">
+                        Property types
+                      </dt>
+                      <dd className="mt-2 text-white/80">
+                        {profile.property_types?.length
+                          ? profile.property_types
+                              .map((value) =>
+                                value === "commercial" ? "Commercial" : "Residential",
+                              )
+                              .join(", ")
+                          : "Commercial"}
+                      </dd>
+                    </div>
                     <div>
                       <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">
                         Industries
