@@ -53,6 +53,9 @@ export type PermitRecord = {
   lead_status: LeadStatus;
   notes: string | null;
   priority_score: number | null;
+  close_probability: number | null;
+  close_factors: Record<string, unknown> | null;
+  enriched_at: string | null;
 };
 
 export type PermitUpdate = Pick<PermitRecord, "lead_status" | "notes">;

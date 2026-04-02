@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getServerEnv } from "@/lib/env";
+import { enrichPermitBatch } from "@/lib/agents/lead-intelligence-orchestrator";
 import { fetchCommercialDemolitionPermits } from "@/lib/permits/arcgis";
 import { normalizePermit } from "@/lib/permits/normalize";
 import { calculatePriority } from "@/lib/scoring/calculate-priority";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 function isAuthorized(request: NextRequest) {
   const serverEnv = getServerEnv();
@@ -106,6 +107,14 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Run intelligence enrichment on unenriched permits (best-effort, max 10)
+    let enrichmentResult = null;
+    try {
+      enrichmentResult = await enrichPermitBatch(undefined, 10);
+    } catch {
+      // Non-fatal: enrichment failure shouldn't block the sync response
+    }
+
     return NextResponse.json({
       success: true,
       mode: fullSync ? "full" : "recent",
@@ -114,6 +123,7 @@ export async function GET(request: NextRequest) {
       skipped,
       newPermitsLogged: newPermitNumbers.length,
       scoredPermits: permits.length,
+      enrichment: enrichmentResult ?? { skipped: true },
       timings: {
         fetchMs: fetchCompletedAt - startedAt,
         totalMs: Date.now() - startedAt,

@@ -17,6 +17,7 @@ const serverEnvSchema = clientEnvSchema.extend({
   CRON_SECRET: z.string().min(1),
   INTERNAL_ADMIN_DOMAIN: z.string().min(1).optional(),
   INTERNAL_ADMIN_EMAILS: z.string().optional(),
+  TAVILY_API_KEY: z.string().optional(),
 });
 
 export function getClientEnv() {
@@ -34,5 +35,6 @@ export function getServerEnv() {
     CRON_SECRET: process.env.CRON_SECRET,
     INTERNAL_ADMIN_DOMAIN: process.env.INTERNAL_ADMIN_DOMAIN,
     INTERNAL_ADMIN_EMAILS: process.env.INTERNAL_ADMIN_EMAILS,
+    TAVILY_API_KEY: process.env.TAVILY_API_KEY,
   });
 }

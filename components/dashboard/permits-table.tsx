@@ -12,12 +12,30 @@ type Props = {
   permits: PermitRecord[];
 };
 
-type SortKey = "date" | "address" | "value" | "sqft" | "floors" | "priority";
+type SortKey = "date" | "address" | "value" | "sqft" | "floors" | "priority" | "close";
 type SortDir = "asc" | "desc";
 
 function formatDate(value: string | null) {
   if (!value) return "—";
   return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(value));
+}
+
+function getCloseColor(probability: number | null) {
+  if (probability === null) return "text-sand/40";
+  if (probability >= 70) return "text-teal";
+  if (probability >= 40) return "text-amber";
+  return "text-sand";
+}
+
+function CloseBadge({ probability }: { probability: number | null }) {
+  if (probability === null) return <span className="text-sand/40">—</span>;
+  const color = getCloseColor(probability);
+  return (
+    <span className={`inline-flex items-center gap-1.5 font-mono text-xs font-semibold ${color}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${probability >= 70 ? "bg-teal" : probability >= 40 ? "bg-amber" : "bg-sand/40"}`} />
+      {probability}%
+    </span>
+  );
 }
 
 function getSortValue(permit: PermitRecord, key: SortKey): string | number {
@@ -28,6 +46,7 @@ function getSortValue(permit: PermitRecord, key: SortKey): string | number {
     case "sqft": return permit.square_footage ?? 0;
     case "floors": return permit.structure_floors ?? 0;
     case "priority": return permit.priority_score ?? 0;
+    case "close": return permit.close_probability ?? 0;
   }
 }
 
@@ -111,6 +130,7 @@ export function PermitsTable({ permits }: Props) {
               <span className="font-mono text-sm text-sand">
                 {formatEstimatedValue(permit.estimated_value)}
               </span>
+              <CloseBadge probability={permit.close_probability} />
             </div>
           </Link>
         ))}
@@ -133,6 +153,7 @@ export function PermitsTable({ permits }: Props) {
                 <th className="px-4 py-3">Contractor</th>
                 <th className="px-4 py-3">Phone</th>
                 <SortHeader label="Priority" sortKey="priority" activeSortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                <SortHeader label="Close %" sortKey="close" activeSortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                 <th className="px-4 py-3">Status</th>
               </tr>
             </thead>
@@ -174,6 +195,9 @@ export function PermitsTable({ permits }: Props) {
                   </td>
                   <td className="px-4 py-3.5">
                     <PriorityBadge score={permit.priority_score} />
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <CloseBadge probability={permit.close_probability} />
                   </td>
                   <td className="px-4 py-3.5">
                     <span className="rounded border border-stroke bg-bg-soft px-2.5 py-1 text-xs font-medium capitalize text-sand">
