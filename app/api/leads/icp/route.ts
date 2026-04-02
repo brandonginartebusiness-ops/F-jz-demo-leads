@@ -26,7 +26,9 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ data: (data ?? []) as IcpProfileRecord[] });
+  return NextResponse.json({ data: (data ?? []) as IcpProfileRecord[] }, {
+    headers: { "Cache-Control": "private, max-age=30, stale-while-revalidate=60" },
+  });
 }
 
 export async function POST(request: NextRequest) {

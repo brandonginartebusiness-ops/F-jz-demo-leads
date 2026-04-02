@@ -1,10 +1,18 @@
+import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
 
 import { SignOutButton } from "@/components/auth/sign-out-button";
-import { AnalyticsDashboard } from "@/components/dashboard/analytics-dashboard";
 import { DashboardNav } from "@/components/dashboard/nav";
 import { getLatestCompanyContext } from "@/lib/company-context/queries";
 import { createClient } from "@/lib/supabase/server";
+
+const AnalyticsDashboard = dynamic(
+  () =>
+    import("@/components/dashboard/analytics-dashboard").then(
+      (m) => m.AnalyticsDashboard,
+    ),
+  { ssr: false },
+);
 
 export default async function AnalyticsPage() {
   const supabase = createClient();

@@ -1,4 +1,18 @@
 import { PermitRecord } from "@/lib/types";
+import {
+  COMMERCIAL_POINTS,
+  DESCRIPTION_KEYWORD_POINTS,
+  DESCRIPTION_KEYWORDS,
+  FLOORS_THRESHOLDS,
+  LEAD_TYPE_POINTS,
+  PRIORITY_THRESHOLD_HOT,
+  PRIORITY_THRESHOLD_WARM,
+  RECENCY_THRESHOLDS,
+  SCORE_MAX,
+  SCORE_MIN,
+  SQFT_THRESHOLDS,
+  VALUE_THRESHOLDS,
+} from "@/lib/scoring/constants";
 
 type PriorityInput = Pick<
   PermitRecord,
@@ -16,7 +30,7 @@ export function calculatePriority(input: PriorityInput) {
   const squareFootagePoints = getSquareFootagePoints(input.square_footage);
   const floorsPoints = getFloorsPoints(input.structure_floors);
   const valuePoints = getValuePoints(input.estimated_value);
-  const commercialPoints = input.residential_commercial === "C" ? 10 : 0;
+  const commercialPoints = input.residential_commercial === "C" ? COMMERCIAL_POINTS : 0;
   const descriptionPoints = getDescriptionPoints(input.detail_description);
   const recencyPoints = getRecencyPoints(input.permit_issued_date);
   const score =
@@ -30,7 +44,7 @@ export function calculatePriority(input: PriorityInput) {
     0;
 
   return {
-    score: Math.max(0, Math.min(score, 100)),
+    score: Math.max(SCORE_MIN, Math.min(score, SCORE_MAX)),
     breakdown: {
       leadType: leadTypePoints,
       squareFootage: squareFootagePoints,
@@ -44,11 +58,11 @@ export function calculatePriority(input: PriorityInput) {
 }
 
 export function getPriorityLabel(score: number) {
-  if (score >= 70) {
+  if (score >= PRIORITY_THRESHOLD_HOT) {
     return "Hot";
   }
 
-  if (score >= 40) {
+  if (score >= PRIORITY_THRESHOLD_WARM) {
     return "Warm";
   }
 
@@ -57,41 +71,31 @@ export function getPriorityLabel(score: number) {
 
 function getLeadTypePoints(leadType: PermitRecord["lead_type"]) {
   if (leadType === "full_demolition") {
-    return 30;
+    return LEAD_TYPE_POINTS.full_demolition;
   }
 
   if (leadType === "partial_demolition") {
-    return 15;
+    return LEAD_TYPE_POINTS.partial_demolition;
   }
 
   if (leadType === "demo_related") {
-    return 5;
+    return LEAD_TYPE_POINTS.demo_related;
   }
 
   if (leadType === "junk") {
-    return -50;
+    return LEAD_TYPE_POINTS.junk;
   }
 
-  return 0;
+  return LEAD_TYPE_POINTS.other;
 }
 
 function getSquareFootagePoints(squareFootage: number | null) {
   const value = squareFootage ?? 0;
 
-  if (value > 10_000) {
-    return 25;
-  }
-
-  if (value > 5_000) {
-    return 20;
-  }
-
-  if (value > 1_000) {
-    return 10;
-  }
-
-  if (value > 0) {
-    return 5;
+  for (const tier of SQFT_THRESHOLDS) {
+    if (value > tier.min) {
+      return tier.points;
+    }
   }
 
   return 0;
@@ -99,12 +103,11 @@ function getSquareFootagePoints(squareFootage: number | null) {
 
 function getFloorsPoints(structureFloors: number | null) {
   const value = structureFloors ?? 0;
-  if (value >= 3) {
-    return 20;
-  }
 
-  if (value >= 2) {
-    return 10;
+  for (const tier of FLOORS_THRESHOLDS) {
+    if (value >= tier.min) {
+      return tier.points;
+    }
   }
 
   return 0;
@@ -113,20 +116,10 @@ function getFloorsPoints(structureFloors: number | null) {
 function getValuePoints(estimatedValue: number | null) {
   const value = estimatedValue ?? 0;
 
-  if (value > 100_000) {
-    return 25;
-  }
-
-  if (value > 50_000) {
-    return 15;
-  }
-
-  if (value > 10_000) {
-    return 10;
-  }
-
-  if (value > 1_000) {
-    return 5;
+  for (const tier of VALUE_THRESHOLDS) {
+    if (value > tier.min) {
+      return tier.points;
+    }
   }
 
   return 0;
@@ -135,12 +128,8 @@ function getValuePoints(estimatedValue: number | null) {
 function getDescriptionPoints(detailDescription: string | null) {
   const normalized = detailDescription?.trim().toUpperCase() ?? "";
 
-  if (
-    normalized.includes("TOTAL") ||
-    normalized.includes("COMPLETE") ||
-    normalized.includes("FULL")
-  ) {
-    return 15;
+  if (DESCRIPTION_KEYWORDS.some((kw) => normalized.includes(kw))) {
+    return DESCRIPTION_KEYWORD_POINTS;
   }
 
   return 0;
@@ -154,20 +143,10 @@ function getRecencyPoints(permitIssuedDate: string | null) {
   const issued = new Date(permitIssuedDate);
   const diffInDays = Math.floor((Date.now() - issued.getTime()) / 86400000);
 
-  if (diffInDays <= 3) {
-    return 20;
-  }
-
-  if (diffInDays <= 7) {
-    return 15;
-  }
-
-  if (diffInDays <= 14) {
-    return 10;
-  }
-
-  if (diffInDays <= 30) {
-    return 5;
+  for (const tier of RECENCY_THRESHOLDS) {
+    if (diffInDays <= tier.maxDays) {
+      return tier.points;
+    }
   }
 
   return 0;

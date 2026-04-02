@@ -17,7 +17,9 @@ export async function GET() {
 
   try {
     const data = await getAnalyticsData();
-    return NextResponse.json(data);
+    return NextResponse.json(data, {
+      headers: { "Cache-Control": "private, max-age=30, stale-while-revalidate=60" },
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to load analytics";
