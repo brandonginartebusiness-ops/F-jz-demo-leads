@@ -1,4 +1,7 @@
+import { redirect } from "next/navigation";
+
 import { LoginForm } from "@/components/auth/login-form";
+import { createClient } from "@/lib/supabase/server";
 
 type Props = {
   searchParams: {
@@ -6,7 +9,16 @@ type Props = {
   };
 };
 
-export default function LoginPage({ searchParams }: Props) {
+export default async function LoginPage({ searchParams }: Props) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect(searchParams.next || "/dashboard");
+  }
+
   return (
     <main
       id="main-content"
