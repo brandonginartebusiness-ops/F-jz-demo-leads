@@ -32,12 +32,18 @@ export async function GET(request: NextRequest) {
     const fullSync = searchParams.get("mode") === "full";
     const startedAt = Date.now();
 
-    // Step 1: Fetch permits from all sources in parallel
-    const [miamiDadeFeatures, cityOfMiamiPermits] = await Promise.all([
+    // Step 1: Fetch permits + ICP profiles in parallel
+    const [miamiDadeFeatures, cityOfMiamiPermits, icpResult] = await Promise.all([
       fetchCommercialDemolitionPermits({ fullSync }),
       fetchCityOfMiamiDemolitionPermits({ fullSync }),
+      admin
+        .from("icp_profiles")
+        .select("property_types, locations")
+        .eq("is_active", true),
     ]);
     const fetchCompletedAt = Date.now();
+
+    const icpProfiles = (icpResult.data ?? []) as { property_types: string[] | null; locations: string[] | null }[];
 
     let skipped = 0;
     const dedupedPermits = new Map<string, ReturnType<typeof normalizePermit>>();
@@ -53,7 +59,7 @@ export async function GET(request: NextRequest) {
 
       const scoredPermit = {
         ...permit,
-        priority_score: calculatePriority(permit).score,
+        priority_score: calculatePriority(permit, icpProfiles).score,
       };
 
       dedupedPermits.set(scoredPermit.permit_number, scoredPermit);
@@ -63,7 +69,7 @@ export async function GET(request: NextRequest) {
     for (const permit of cityOfMiamiPermits) {
       const scoredPermit = {
         ...permit,
-        priority_score: calculatePriority(permit).score,
+        priority_score: calculatePriority(permit, icpProfiles).score,
       };
 
       dedupedPermits.set(scoredPermit.permit_number, scoredPermit);
