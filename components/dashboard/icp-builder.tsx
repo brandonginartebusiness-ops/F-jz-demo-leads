@@ -86,6 +86,7 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [isRescoring, setIsRescoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [profileToDelete, setProfileToDelete] = useState<IcpProfileRecord | null>(null);
@@ -161,6 +162,31 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
       );
     } finally {
       setIsDeleting(false);
+    }
+  }
+
+  async function handleRescore() {
+    setError(null);
+    setSuccess(null);
+    setIsRescoring(true);
+
+    try {
+      const response = await fetch("/api/permits/score", { method: "POST" });
+      const payload = (await response.json().catch(() => null)) as
+        | { error?: string; updated?: number }
+        | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "Failed to rescore permits");
+      }
+
+      setSuccess(`Rescored ${payload?.updated ?? 0} permits — ICP matches now reflect in priority sort.`);
+    } catch (rescoreError) {
+      setError(
+        rescoreError instanceof Error ? rescoreError.message : "Failed to rescore permits",
+      );
+    } finally {
+      setIsRescoring(false);
     }
   }
 
@@ -396,9 +422,20 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
                 Reusable targeting profiles
               </h2>
             </div>
-            <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">Profiles</p>
-              <p className="mt-1 text-xl font-semibold text-white">{profiles.length}</p>
+            <div className="flex items-center gap-3">
+              <button
+                className="rounded-xl border border-[#FF6B00]/25 px-4 py-3 text-sm text-[#C0C0C0] transition hover:border-[#FF6B00]/50 hover:text-[#FF6B00] disabled:opacity-40"
+                disabled={isRescoring}
+                onClick={handleRescore}
+                title="Re-apply active ICP profiles to all permit priority scores"
+                type="button"
+              >
+                {isRescoring ? "Rescoring…" : "Rescore permits"}
+              </button>
+              <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3">
+                <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">Profiles</p>
+                <p className="mt-1 text-xl font-semibold text-white">{profiles.length}</p>
+              </div>
             </div>
           </div>
 
