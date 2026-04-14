@@ -85,6 +85,7 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
   const [form, setForm] = useState<FormState>(initialFormState);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [profileToDelete, setProfileToDelete] = useState<IcpProfileRecord | null>(null);
@@ -160,6 +161,36 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
       );
     } finally {
       setIsDeleting(false);
+    }
+  }
+
+  async function handleToggleActive(profile: IcpProfileRecord) {
+    setError(null);
+    setSuccess(null);
+    setTogglingId(profile.id);
+
+    try {
+      const response = await fetch(`/api/leads/icp/${profile.id}`, {
+        method: "PATCH",
+      });
+      const payload = (await response.json().catch(() => null)) as
+        | { error?: string; data?: IcpProfileRecord }
+        | null;
+
+      if (!response.ok || !payload?.data) {
+        throw new Error(payload?.error ?? "Failed to update profile");
+      }
+
+      setProfiles((current) =>
+        current.map((p) => (p.id === profile.id ? (payload.data as IcpProfileRecord) : p)),
+      );
+      setSuccess(payload.data.is_active ? "Profile active in pipeline." : "Profile removed from pipeline.");
+    } catch (toggleError) {
+      setError(
+        toggleError instanceof Error ? toggleError.message : "Failed to update profile",
+      );
+    } finally {
+      setTogglingId(null);
     }
   }
 
@@ -390,8 +421,14 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
                         {profile.locations?.join(", ") || DEFAULT_LOCATION}
                       </p>
                     </div>
-                    <span className="rounded-full bg-[#FF6B00]/15 px-3 py-1 text-xs font-medium text-[#C0C0C0]">
-                      Active
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-medium ${
+                        profile.is_active
+                          ? "bg-[#FF6B00]/20 text-[#FF6B00]"
+                          : "bg-[#333]/40 text-[#666]"
+                      }`}
+                    >
+                      {profile.is_active ? "Active" : "Inactive"}
                     </span>
                   </div>
 
@@ -445,11 +482,20 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
 
                   <div className="mt-6 flex flex-wrap gap-3">
                     <button
-                      className="rounded-xl border border-[#FF6B00]/25 px-4 py-3 text-sm text-[#888888]"
-                      disabled
+                      className={`rounded-xl border px-4 py-3 text-sm transition ${
+                        profile.is_active
+                          ? "border-[#FF6B00]/50 text-[#FF6B00] hover:border-[#c05a4f] hover:text-[#f2c4bf]"
+                          : "border-[#FF6B00]/25 text-[#C0C0C0] hover:border-[#FF6B00]/50 hover:text-[#FF6B00]"
+                      } disabled:opacity-40`}
+                      disabled={togglingId === profile.id}
+                      onClick={() => handleToggleActive(profile)}
                       type="button"
                     >
-                      Use in Pipeline
+                      {togglingId === profile.id
+                        ? "Saving…"
+                        : profile.is_active
+                          ? "Active in Pipeline"
+                          : "Use in Pipeline"}
                     </button>
                     <button
                       className="rounded-xl border border-[#FF6B00]/25 px-4 py-3 text-sm text-[#C0C0C0] transition hover:border-[#c05a4f] hover:text-[#f2c4bf]"
