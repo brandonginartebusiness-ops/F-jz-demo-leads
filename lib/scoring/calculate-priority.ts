@@ -1,10 +1,15 @@
 import { PermitRecord } from "@/lib/types";
 import {
   COMMERCIAL_POINTS,
+  DEMO_SPECIALIST_KEYWORDS,
   DESCRIPTION_KEYWORD_POINTS,
   DESCRIPTION_KEYWORDS,
   FLOORS_THRESHOLDS,
+  ICP_MATCH_BONUS,
   LEAD_TYPE_POINTS,
+  OPEN_SLOT_BONUS,
+  PRIORITY_CORRIDOR_BONUS,
+  PRIORITY_CORRIDORS,
   PRIORITY_THRESHOLD_HOT,
   PRIORITY_THRESHOLD_WARM,
   RECENCY_THRESHOLDS,
@@ -13,6 +18,11 @@ import {
   SQFT_THRESHOLDS,
   VALUE_THRESHOLDS,
 } from "@/lib/scoring/constants";
+
+type IcpProfile = {
+  property_types: string[] | null;
+  locations: string[] | null;
+};
 
 type PriorityInput = Pick<
   PermitRecord,
@@ -23,9 +33,12 @@ type PriorityInput = Pick<
   | "residential_commercial"
   | "square_footage"
   | "structure_floors"
+  | "contractor_name"
+  | "city"
+  | "property_address"
 >;
 
-export function calculatePriority(input: PriorityInput) {
+export function calculatePriority(input: PriorityInput, icpProfiles: IcpProfile[] = []) {
   const leadTypePoints = getLeadTypePoints(input.lead_type);
   const squareFootagePoints = getSquareFootagePoints(input.square_footage);
   const floorsPoints = getFloorsPoints(input.structure_floors);
@@ -33,6 +46,10 @@ export function calculatePriority(input: PriorityInput) {
   const commercialPoints = input.residential_commercial === "C" ? COMMERCIAL_POINTS : 0;
   const descriptionPoints = getDescriptionPoints(input.detail_description);
   const recencyPoints = getRecencyPoints(input.permit_issued_date);
+  const openSlotPoints = getOpenSlotPoints(input.contractor_name);
+  const corridorPoints = getCorridorPoints(input.city, input.property_address ?? null);
+  const icpPoints = getIcpMatchPoints(input.residential_commercial, input.city, icpProfiles);
+
   const score =
     leadTypePoints +
     squareFootagePoints +
@@ -41,7 +58,9 @@ export function calculatePriority(input: PriorityInput) {
     commercialPoints +
     descriptionPoints +
     recencyPoints +
-    0;
+    openSlotPoints +
+    corridorPoints +
+    icpPoints;
 
   return {
     score: Math.max(SCORE_MIN, Math.min(score, SCORE_MAX)),
@@ -53,6 +72,9 @@ export function calculatePriority(input: PriorityInput) {
       commercial: commercialPoints,
       description: descriptionPoints,
       recency: recencyPoints,
+      openSlot: openSlotPoints,
+      corridor: corridorPoints,
+      icp: icpPoints,
     },
   };
 }
@@ -147,6 +169,53 @@ function getRecencyPoints(permitIssuedDate: string | null) {
     if (diffInDays <= tier.maxDays) {
       return tier.points;
     }
+  }
+
+  return 0;
+}
+
+// Open slot: if the contractor is not a demolition specialist, the sub slot is likely available.
+// No contractor listed is also an open slot.
+function getOpenSlotPoints(contractorName: string | null): number {
+  if (!contractorName) return OPEN_SLOT_BONUS;
+
+  const normalized = contractorName.toUpperCase();
+  const isDemoSpecialist = DEMO_SPECIALIST_KEYWORDS.some((kw) => normalized.includes(kw));
+
+  return isDemoSpecialist ? 0 : OPEN_SLOT_BONUS;
+}
+
+// Corridor bonus: permit is in a high-activity Miami-Dade demolition corridor.
+// Checks both the city field and property address for corridor names.
+function getCorridorPoints(city: string | null, propertyAddress: string | null): number {
+  const haystack = `${city ?? ""} ${propertyAddress ?? ""}`.toUpperCase();
+
+  const inCorridor = PRIORITY_CORRIDORS.some((corridor) => haystack.includes(corridor));
+  return inCorridor ? PRIORITY_CORRIDOR_BONUS : 0;
+}
+
+// ICP match: permit matches an active Ideal Customer Profile on property type and/or location.
+function getIcpMatchPoints(
+  residentialCommercial: string | null,
+  city: string | null,
+  icpProfiles: IcpProfile[],
+): number {
+  if (icpProfiles.length === 0) return 0;
+
+  const isCommercial = residentialCommercial === "C";
+  const cityNorm = (city ?? "").toUpperCase().trim();
+
+  for (const icp of icpProfiles) {
+    const typesMatch = isCommercial && (icp.property_types ?? []).includes("commercial");
+    const locationMatch =
+      cityNorm.length > 0 &&
+      (icp.locations ?? []).some((loc) => {
+        const locNorm = loc.toUpperCase();
+        return cityNorm.includes(locNorm) || locNorm.includes(cityNorm);
+      });
+
+    if (typesMatch && locationMatch) return ICP_MATCH_BONUS;
+    if (typesMatch || locationMatch) return Math.floor(ICP_MATCH_BONUS / 2);
   }
 
   return 0;

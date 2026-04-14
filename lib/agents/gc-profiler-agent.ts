@@ -20,6 +20,16 @@ type ArcGisResponse = {
   exceededTransferLimit?: boolean;
 };
 
+// Sanitize a string for use in an ArcGIS REST API WHERE clause string literal.
+// Doubles single-quotes (ESRI SQL dialect) and strips SQL comment/injection sequences.
+function sanitizeArcGisString(value: string): string {
+  return value
+    .replace(/--|\/\*|\*\//g, "")  // strip comment sequences
+    .replace(/;/g, "")             // strip statement terminators
+    .replace(/'/g, "''")           // escape single-quotes for ESRI SQL
+    .slice(0, 200);
+}
+
 export async function runGCProfiler(_permits: PermitRecord[]) {
   const admin = createAdminClient();
 
@@ -39,7 +49,8 @@ export async function runGCProfiler(_permits: PermitRecord[]) {
       twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1);
       const dateStr = twelveMonthsAgo.toISOString().split("T")[0];
 
-      const where = `ContractorName='${gcName.replace(/'/g, "''")}' AND PermitIssuedDate >= '${dateStr}'`;
+      const safeGcName = sanitizeArcGisString(gcName);
+      const where = `ContractorName='${safeGcName}' AND PermitIssuedDate >= '${dateStr}'`;
       const params = new URLSearchParams({
         where,
         outFields: "PermitType,EstimatedValue,PermitIssuedDate,DetailDescriptionComments,PropertyAddress,City",

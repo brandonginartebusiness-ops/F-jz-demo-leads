@@ -18,6 +18,12 @@ type ArcGisResponse = {
   features?: ArcGisFeature[];
 };
 
+// Miami-Dade folio numbers are digits and dashes only (e.g. "01-1234-567-8901").
+// Strip anything else before interpolating into the ArcGIS WHERE clause.
+function sanitizeFolioNumber(value: string): string {
+  return value.replace(/[^0-9-]/g, "").slice(0, 30);
+}
+
 export async function runPermitEnrichment(permits: PermitRecord[]) {
   const admin = createAdminClient();
 
@@ -25,7 +31,9 @@ export async function runPermitEnrichment(permits: PermitRecord[]) {
     if (!permit.folio_number) continue;
 
     try {
-      const where = `FolioNumber='${permit.folio_number.replace(/'/g, "''")}'`;
+      const safeFollio = sanitizeFolioNumber(permit.folio_number);
+      if (!safeFollio) continue;
+      const where = `FolioNumber='${safeFollio}'`;
       const params = new URLSearchParams({
         where,
         outFields: "PermitNumber,PermitType,ContractorName,PermitIssuedDate,DetailDescriptionComments",
