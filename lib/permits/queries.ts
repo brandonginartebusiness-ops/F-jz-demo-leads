@@ -146,7 +146,7 @@ export async function listPermits(searchParams: DashboardSearchParams) {
       break;
   }
 
-  const { data, error } = await query;
+  const { data, error } = await query.limit(500);
 
   if (error) {
     throw error;

@@ -16,8 +16,10 @@ type Props = {
 
 export default async function DashboardPage({ searchParams }: Props) {
   const effectiveSearchParams = getEffectiveDashboardSearchParams(searchParams);
-  const permits = await listPermits(searchParams);
-  const companyContext = await getLatestCompanyContext();
+  const [permits, companyContext] = await Promise.all([
+    listPermits(searchParams),
+    getLatestCompanyContext(),
+  ]);
   const totalValue = permits.reduce(
     (sum, permit) =>
       sum + ((permit.estimated_value ?? 0) > 1 ? (permit.estimated_value ?? 0) : 0),
