@@ -7,9 +7,13 @@ const PUBLIC_PATHS = ["/login"];
 export async function middleware(request: NextRequest) {
   const { supabase, response } = createClient(request);
 
+  // Use getSession() here — it reads from the cookie without a network call,
+  // keeping middleware under Vercel's 50ms Edge Runtime CPU limit.
+  // Server components and route handlers use getUser() for authoritative validation.
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
 
   const isPublicPath = PUBLIC_PATHS.some((path) =>
     request.nextUrl.pathname.startsWith(path),
