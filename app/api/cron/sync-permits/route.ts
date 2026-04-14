@@ -6,6 +6,7 @@ import { runDeveloperLookup } from "@/lib/agents/developer-lookup-agent";
 import { runGCProfiler } from "@/lib/agents/gc-profiler-agent";
 import { runCloseProbability } from "@/lib/agents/close-probability-agent";
 import { fetchCommercialDemolitionPermits } from "@/lib/permits/arcgis";
+import { fetchCityOfMiamiDemolitionPermits } from "@/lib/permits/city-of-miami";
 import { normalizePermit } from "@/lib/permits/normalize";
 import { calculatePriority } from "@/lib/scoring/calculate-priority";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -31,14 +32,18 @@ export async function GET(request: NextRequest) {
     const fullSync = searchParams.get("mode") === "full";
     const startedAt = Date.now();
 
-    // Step 1: Sync new permits from ArcGIS
-    const features = await fetchCommercialDemolitionPermits({ fullSync });
+    // Step 1: Fetch permits from all sources in parallel
+    const [miamiDadeFeatures, cityOfMiamiPermits] = await Promise.all([
+      fetchCommercialDemolitionPermits({ fullSync }),
+      fetchCityOfMiamiDemolitionPermits({ fullSync }),
+    ]);
     const fetchCompletedAt = Date.now();
 
     let skipped = 0;
     const dedupedPermits = new Map<string, ReturnType<typeof normalizePermit>>();
 
-    for (const feature of features) {
+    // Miami-Dade county permits
+    for (const feature of miamiDadeFeatures) {
       const permit = normalizePermit(feature);
 
       if (!permit?.permit_number) {
@@ -46,6 +51,16 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
+      const scoredPermit = {
+        ...permit,
+        priority_score: calculatePriority(permit).score,
+      };
+
+      dedupedPermits.set(scoredPermit.permit_number, scoredPermit);
+    }
+
+    // City of Miami permits (already normalized)
+    for (const permit of cityOfMiamiPermits) {
       const scoredPermit = {
         ...permit,
         priority_score: calculatePriority(permit).score,
@@ -142,7 +157,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       mode: fullSync ? "full" : "recent",
-      fetched: features.length,
+      fetched: {
+        miami_dade: miamiDadeFeatures.length,
+        city_of_miami: cityOfMiamiPermits.length,
+        total: miamiDadeFeatures.length + cityOfMiamiPermits.length,
+      },
       upserted: permits.length,
       skipped,
       newPermitsLogged: newPermitNumbers.length,
