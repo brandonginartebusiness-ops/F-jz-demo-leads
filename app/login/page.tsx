@@ -9,14 +9,23 @@ type Props = {
   };
 };
 
+function safeRedirectPath(value?: string): string {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+    return "/dashboard";
+  }
+  return value;
+}
+
 export default async function LoginPage({ searchParams }: Props) {
   const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const redirectTo = safeRedirectPath(searchParams.next);
+
   if (user) {
-    redirect(searchParams.next || "/dashboard");
+    redirect(redirectTo);
   }
 
   return (
@@ -65,7 +74,7 @@ export default async function LoginPage({ searchParams }: Props) {
           <div className="mt-10 flex gap-8 border-t border-stroke pt-6">
             <div>
               <p className="label-stencil">Daily sync</p>
-              <p className="mt-1 font-display text-3xl text-accent">11:00 AM</p>
+              <p className="mt-1 font-display text-3xl text-accent">4:00 AM ET</p>
             </div>
             <div>
               <p className="label-stencil">Data source</p>
@@ -90,7 +99,7 @@ export default async function LoginPage({ searchParams }: Props) {
               Use your shared internal team credentials to access the permit dashboard.
             </p>
           </div>
-          <LoginForm redirectTo={searchParams.next || "/dashboard"} />
+          <LoginForm redirectTo={redirectTo} />
         </section>
       </div>
     </main>

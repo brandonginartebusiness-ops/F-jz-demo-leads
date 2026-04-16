@@ -28,34 +28,34 @@ export default async function IcpPage() {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mb-8 flex flex-col gap-6 rounded-3xl bg-[#1a1a1a] p-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <main id="main-content" className="mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <header className="hazard-top mb-8 card p-6 animate-enter">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-[#C0C0C0]">
-              Targeting workspace
-            </p>
-            <h1 className="mt-3 text-3xl font-semibold text-white">ICP Builder</h1>
-            <p className="mt-3 max-w-2xl text-sm text-[#888888]">
+            <p className="label-stencil text-accent">Targeting workspace</p>
+            <h1 className="mt-2 font-display text-4xl text-sand-bright lg:text-5xl">
+              ICP BUILDER
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-sand">
               Build reusable ideal customer profiles for demolition outreach across
               industries, buyer roles, employee ranges, and locations.
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">Profiles</p>
-              <p className="mt-1 text-xl font-semibold text-white">
-                {(data ?? []).length}
-              </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
+            <div className="card-accent px-5 py-3">
+              <p className="label-stencil">Profiles</p>
+              <p className="mt-1 stat-value-sm">{(data ?? []).length}</p>
             </div>
             <SignOutButton />
           </div>
         </div>
-        <DashboardNav
-          currentPath="/dashboard/icp"
-          showSetupWarning={!companyContext}
-        />
-      </div>
+        <div className="mt-6 border-t border-stroke pt-4">
+          <DashboardNav
+            currentPath="/dashboard/icp"
+            showSetupWarning={!companyContext}
+          />
+        </div>
+      </header>
 
       <IcpBuilder initialProfiles={(data ?? []) as IcpProfileRecord[]} />
     </main>

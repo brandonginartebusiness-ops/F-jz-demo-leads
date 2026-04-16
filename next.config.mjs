@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone",
-
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60,
@@ -41,6 +39,7 @@ const nextConfig = {
               "img-src 'self' blob: data:",
               "font-src 'self'",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+              "frame-src 'self' https://www.google.com",
               "frame-ancestors 'none'",
             ].join("; "),
           },

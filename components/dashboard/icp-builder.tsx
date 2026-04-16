@@ -223,15 +223,13 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
   return (
     <>
       <div className="space-y-6">
-        <section className="rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
+        <section className="card-accent p-6 animate-enter delay-1">
           <div className="mb-6">
-            <p className="text-sm uppercase tracking-[0.3em] text-[#C0C0C0]">
-              New ICP profile
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">
-              Define your ideal demolition buyer
+            <p className="label-stencil text-accent">New ICP profile</p>
+            <h2 className="mt-2 font-display text-2xl text-sand-bright">
+              DEFINE YOUR IDEAL DEMOLITION BUYER
             </h2>
-            <p className="mt-2 max-w-3xl text-sm text-[#888888]">
+            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-sand">
               Save target industries, buyer titles, employee ranges, and locations
               so your pipeline can reuse them later. New profiles default to
               commercial properties only.
@@ -241,13 +239,13 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
           <form className="grid gap-5 lg:grid-cols-2" onSubmit={handleSubmit}>
             <div className="lg:col-span-2">
               <label
-                className="mb-2 block text-sm font-medium text-white"
+                className="label-stencil mb-2 block"
                 htmlFor="profile-name"
               >
                 Profile name
               </label>
               <input
-                className="w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
+                className="input"
                 id="profile-name"
                 onChange={(event) =>
                   setForm((current) => ({ ...current, name: event.target.value }))
@@ -258,14 +256,14 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
             </div>
 
             <div className="lg:col-span-2">
-              <label className="mb-2 block text-sm font-medium text-white">
+              <label className="label-stencil mb-2 block">
                 Property types
               </label>
-              <div className="flex flex-wrap gap-3 rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-4">
-                <label className="flex items-center gap-2 text-sm text-white">
+              <div className="card flex flex-wrap gap-3 p-4">
+                <label className="flex items-center gap-2 text-sm text-sand-bright">
                   <input
                     checked={form.property_types.includes("commercial")}
-                    className="h-4 w-4 accent-[#FF6B00]"
+                    className="h-4 w-4 accent-accent"
                     onChange={(event) =>
                       setForm((current) => ({
                         ...current,
@@ -280,10 +278,10 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
                   />
                   Commercial
                 </label>
-                <label className="flex items-center gap-2 text-sm text-white">
+                <label className="flex items-center gap-2 text-sm text-sand-bright">
                   <input
                     checked={form.property_types.includes("residential")}
-                    className="h-4 w-4 accent-[#FF6B00]"
+                    className="h-4 w-4 accent-accent"
                     onChange={(event) =>
                       setForm((current) => ({
                         ...current,
@@ -299,7 +297,7 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
                   Residential
                 </label>
               </div>
-              <p className="mt-2 text-xs text-[#888888]">
+              <p className="mt-2 text-xs text-sand">
                 Commercial is selected by default so new targeting profiles stay aligned
                 with the dashboard.
               </p>
@@ -319,13 +317,13 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
 
             <div>
               <label
-                className="mb-2 block text-sm font-medium text-white"
+                className="label-stencil mb-2 block"
                 htmlFor="company-size-min"
               >
                 Min employees
               </label>
               <input
-                className="w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
+                className="input"
                 id="company-size-min"
                 min={0}
                 onChange={(event) =>
@@ -342,13 +340,13 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
 
             <div>
               <label
-                className="mb-2 block text-sm font-medium text-white"
+                className="label-stencil mb-2 block"
                 htmlFor="company-size-max"
               >
                 Max employees
               </label>
               <input
-                className="w-full rounded-xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3 text-white outline-none transition focus:border-[#FF6B00]"
+                className="input"
                 id="company-size-max"
                 min={0}
                 onChange={(event) =>
@@ -389,10 +387,10 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
             {(error || success) && (
               <div className="lg:col-span-2">
                 <div
-                  className={`rounded-2xl border px-4 py-3 text-sm ${
+                  className={`card px-4 py-3 text-sm ${
                     error
-                      ? "border-[#c05a4f]/40 bg-[#c05a4f]/10 text-[#f2c4bf]"
-                      : "border-[#FF6B00]/25 bg-[#FF6B00]/10 text-[#C0C0C0]"
+                      ? "border-red-500/40 bg-red-500/10 text-red-200"
+                      : "border-stroke-accent bg-accent/10 text-sand-light"
                   }`}
                 >
                   {error ?? success}
@@ -402,7 +400,7 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
 
             <div className="lg:col-span-2">
               <button
-                className="rounded-xl bg-[#FF6B00] px-5 py-3 font-medium text-[#0a0a0a] transition hover:bg-[#FF8C00] disabled:cursor-not-allowed disabled:opacity-60"
+                className="btn-accent"
                 disabled={!canSubmit || isSaving}
                 type="submit"
               >
@@ -412,35 +410,33 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
           </form>
         </section>
 
-        <section className="rounded-3xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-6">
-          <div className="mb-6 flex items-end justify-between gap-4">
+        <section className="card-accent p-6 animate-enter delay-2">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-[#C0C0C0]">
-                Saved ICP profiles
-              </p>
-              <h2 className="mt-3 text-2xl font-semibold text-white">
-                Reusable targeting profiles
+              <p className="label-stencil text-accent">Saved ICP profiles</p>
+              <h2 className="mt-2 font-display text-2xl text-sand-bright">
+                REUSABLE TARGETING PROFILES
               </h2>
             </div>
             <div className="flex items-center gap-3">
               <button
-                className="rounded-xl border border-[#FF6B00]/25 px-4 py-3 text-sm text-[#C0C0C0] transition hover:border-[#FF6B00]/50 hover:text-[#FF6B00] disabled:opacity-40"
+                className="btn-ghost-sm"
                 disabled={isRescoring}
                 onClick={handleRescore}
                 title="Re-apply active ICP profiles to all permit priority scores"
                 type="button"
               >
-                {isRescoring ? "Rescoring…" : "Rescore permits"}
+                {isRescoring ? "Rescoring..." : "Rescore permits"}
               </button>
-              <div className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] px-4 py-3">
-                <p className="text-xs uppercase tracking-[0.2em] text-[#888888]">Profiles</p>
-                <p className="mt-1 text-xl font-semibold text-white">{profiles.length}</p>
+              <div className="card-accent px-5 py-3">
+                <p className="label-stencil">Profiles</p>
+                <p className="mt-1 stat-value-sm">{profiles.length}</p>
               </div>
             </div>
           </div>
 
           {profiles.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-[#FF6B00]/25 bg-[#1a1a1a] p-10 text-center text-[#888888]">
+            <div className="card border-dashed p-10 text-center text-sand">
               No ICP profiles yet. Create your first profile to define who the team
               should target next.
             </div>
@@ -449,20 +445,20 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
               {profiles.map((profile) => (
                 <article
                   key={profile.id}
-                  className="rounded-2xl border border-[#FF6B00]/25 bg-[#1a1a1a] p-5"
+                  className="card p-5 transition-all duration-200 hover:border-stroke-accent"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="text-lg font-semibold text-white">{profile.name}</h3>
-                      <p className="mt-1 text-sm text-[#888888]">
+                      <h3 className="text-lg font-semibold text-sand-bright">{profile.name}</h3>
+                      <p className="mt-1 text-sm text-sand">
                         {profile.locations?.join(", ") || DEFAULT_LOCATION}
                       </p>
                     </div>
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-medium ${
                         profile.is_active
-                          ? "bg-[#FF6B00]/20 text-[#FF6B00]"
-                          : "bg-[#333]/40 text-[#666]"
+                          ? "bg-accent/20 text-accent"
+                          : "bg-bg-soft text-sand"
                       }`}
                     >
                       {profile.is_active ? "Active" : "Inactive"}
@@ -471,10 +467,8 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
 
                   <dl className="mt-5 space-y-4 text-sm">
                     <div>
-                      <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">
-                        Property types
-                      </dt>
-                      <dd className="mt-2 text-white/80">
+                      <dt className="label-stencil">Property types</dt>
+                      <dd className="mt-2 text-sand-light">
                         {profile.property_types?.length
                           ? profile.property_types
                               .map((value) =>
@@ -485,30 +479,24 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">
-                        Industries
-                      </dt>
-                      <dd className="mt-2 text-white/80">
+                      <dt className="label-stencil">Industries</dt>
+                      <dd className="mt-2 text-sand-light">
                         {profile.industries?.length
                           ? profile.industries.join(", ")
                           : "Not specified"}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">
-                        Job titles
-                      </dt>
-                      <dd className="mt-2 text-white/80">
+                      <dt className="label-stencil">Job titles</dt>
+                      <dd className="mt-2 text-sand-light">
                         {profile.job_titles?.length
                           ? profile.job_titles.join(", ")
                           : "Not specified"}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs uppercase tracking-[0.2em] text-[#888888]">
-                        Company size
-                      </dt>
-                      <dd className="mt-2 text-white/80">
+                      <dt className="label-stencil">Company size</dt>
+                      <dd className="mt-2 text-sand-light">
                         {formatCompanySize(
                           profile.company_size_min,
                           profile.company_size_max,
@@ -519,23 +507,23 @@ export function IcpBuilder({ initialProfiles }: IcpBuilderProps) {
 
                   <div className="mt-6 flex flex-wrap gap-3">
                     <button
-                      className={`rounded-xl border px-4 py-3 text-sm transition ${
+                      className={`btn text-sm px-4 py-2 border ${
                         profile.is_active
-                          ? "border-[#FF6B00]/50 text-[#FF6B00] hover:border-[#c05a4f] hover:text-[#f2c4bf]"
-                          : "border-[#FF6B00]/25 text-[#C0C0C0] hover:border-[#FF6B00]/50 hover:text-[#FF6B00]"
+                          ? "border-accent/50 text-accent hover:border-red-400 hover:text-red-300"
+                          : "border-stroke text-sand hover:border-accent/50 hover:text-accent"
                       } disabled:opacity-40`}
                       disabled={togglingId === profile.id}
                       onClick={() => handleToggleActive(profile)}
                       type="button"
                     >
                       {togglingId === profile.id
-                        ? "Saving…"
+                        ? "Saving..."
                         : profile.is_active
                           ? "Active in Pipeline"
                           : "Use in Pipeline"}
                     </button>
                     <button
-                      className="rounded-xl border border-[#FF6B00]/25 px-4 py-3 text-sm text-[#C0C0C0] transition hover:border-[#c05a4f] hover:text-[#f2c4bf]"
+                      className="btn-ghost-sm hover:border-red-400/50 hover:text-red-300"
                       onClick={() => setProfileToDelete(profile)}
                       type="button"
                     >

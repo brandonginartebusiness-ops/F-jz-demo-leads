@@ -31,9 +31,9 @@ export async function runPermitEnrichment(permits: PermitRecord[]) {
     if (!permit.folio_number) continue;
 
     try {
-      const safeFollio = sanitizeFolioNumber(permit.folio_number);
-      if (!safeFollio) continue;
-      const where = `FolioNumber='${safeFollio}'`;
+      const safeFolio = sanitizeFolioNumber(permit.folio_number);
+      if (!safeFolio) continue;
+      const where = `FolioNumber='${safeFolio}'`;
       const params = new URLSearchParams({
         where,
         outFields: "PermitNumber,PermitType,ContractorName,PermitIssuedDate,DetailDescriptionComments",
